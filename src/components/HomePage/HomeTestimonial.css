@@ -1,0 +1,21 @@
+.carousel-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.left-arrow {
+    position: absolute;
+    left: 50px;
+}
+
+.right-arrow {
+    position: absolute;
+    /* right: 30px; */
+}
+
+.carousel-arrow svg path {
+    fill: yellow !important;
+}

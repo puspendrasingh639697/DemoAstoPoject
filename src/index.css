@@ -1,0 +1,76 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Enable smooth scrolling globally */
+html {
+  scroll-behavior: smooth;
+}
+@layer utilities {
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in {
+    animation: slide-in 0.5s ease-out;
+  }
+}
+.neon-card {
+  width: 100%;
+  max-width: 220px;
+  height: 270px;
+  background: #edea38;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 20px;
+  margin: auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+.neon-card .content {
+  z-index: 1;
+}
+
+.neon-card::before {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 130%;
+  background-image: linear-gradient(
+    180deg,
+    rgb(45, 109, 182),
+    rgb(255, 48, 48)
+  );
+  animation: rotBGimg 3s linear infinite;
+}
+
+.neon-card::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  background: #cc1313;
+  border-radius: 15px;
+  z-index: 0;
+}
+
+@keyframes rotBGimg {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
