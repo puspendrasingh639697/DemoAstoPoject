@@ -673,13 +673,12 @@ const PanditSection = () => {
     };
 
     // ✅ Call Handler - Send notification and open call UI
-   const handleVideoCall = (pandit) => {
+const handleVideoCall = (pandit) => {
     console.log('📞 Opening Call UI for:', pandit.firstName);
     setCallChatUser(pandit);
     setShowCallChat(true);
     setShowChat(false);
 };
-
     if (loading) {
         return <div className="flex justify-center items-center h-64">Loading Pandits...</div>;
     }

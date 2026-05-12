@@ -880,10 +880,8 @@ const PanditUnifiedDashboard = () => {
     }, [panditId, activeChat]);
 
     // ✅ Accept Call Function
-    const acceptCall = (notif) => {
+ const acceptCall = (notif) => {
     console.log('✅ Accepting call from:', notif.data.from);
-    
-    // ✅ Just open the voice call window - VideoCallChat will handle WebRTC answer
     setCallerInfo({
         id: notif.data.from,
         name: `User ${notif.data.from?.slice(-6)}`,
