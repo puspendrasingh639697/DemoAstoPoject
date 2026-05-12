@@ -881,17 +881,17 @@ const PanditUnifiedDashboard = () => {
 
     // ✅ Accept Call Function
     const acceptCall = (notif) => {
-        console.log('✅ Accepting call from:', notif.data.from);
-        
-        // Open voice call window
-        setCallerInfo({
-            id: notif.data.from,
-            name: `User ${notif.data.from?.slice(-6)}`,
-            signal: notif.data.signal
-        });
-        setShowVoiceCall(true);
-        setNotifications(prev => prev.filter(n => n.id !== notif.id));
-    };
+    console.log('✅ Accepting call from:', notif.data.from);
+    
+    // ✅ Just open the voice call window - VideoCallChat will handle WebRTC answer
+    setCallerInfo({
+        id: notif.data.from,
+        name: `User ${notif.data.from?.slice(-6)}`,
+        signal: notif.data.signal
+    });
+    setShowVoiceCall(true);
+    setNotifications(prev => prev.filter(n => n.id !== notif.id));
+};
 
     const declineCall = (notif) => {
         console.log('❌ Declining call from:', notif.data.from);
