@@ -673,26 +673,34 @@ const PanditSection = () => {
     };
 
     // ✅ Call Handler - Send notification and open call UI
-    const handleVideoCall = (pandit) => {
-        console.log('📞 Calling Pandit:', pandit.firstName, 'ID:', pandit._id);
+    // const handleVideoCall = (pandit) => {
+    //     console.log('📞 Calling Pandit:', pandit.firstName, 'ID:', pandit._id);
         
-        // Send call notification to pandit
-        const tempSocket = io('https://astrologer-backendcoll-chaat.onrender.com');
-        tempSocket.on('connect', () => {
-            tempSocket.emit('call-user', {
-                to: String(pandit._id),
-                from: String(user?.phone || '9999999999'),
-                signal: 'call_request'
-            });
-            console.log('✅ Call emitted to:', pandit._id);
-            setTimeout(() => tempSocket.close(), 1000);
-        });
+    //     // Send call notification to pandit
+    //     const tempSocket = io('https://astrologer-backendcoll-chaat.onrender.com');
+    //     tempSocket.on('connect', () => {
+    //         tempSocket.emit('call-user', {
+    //             to: String(pandit._id),
+    //             from: String(user?.phone || '9999999999'),
+    //             signal: 'call_request'
+    //         });
+    //         console.log('✅ Call emitted to:', pandit._id);
+    //         setTimeout(() => tempSocket.close(), 1000);
+    //     });
         
-        // Open call UI
-        setCallChatUser(pandit);
-        setShowCallChat(true);
-        setShowChat(false);
-    };
+    //     // Open call UI
+    //     setCallChatUser(pandit);
+    //     setShowCallChat(true);
+    //     setShowChat(false);
+    // };
+
+    // ✅ CORRECT - No manual socket emit
+const handleVideoCall = (pandit) => {
+    console.log('📞 Opening Call UI for:', pandit.firstName);
+    setCallChatUser(pandit);
+    setShowCallChat(true);
+    setShowChat(false);
+};
 
     if (loading) {
         return <div className="flex justify-center items-center h-64">Loading Pandits...</div>;
