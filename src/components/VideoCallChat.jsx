@@ -1623,111 +1623,119 @@ const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isIni
         }, 100);
     };
 
-    useEffect(() => {
-        console.log('🔵 VideoCallChat mounted:', { currentUserId, targetUserId, isInitiator });
+   useEffect(() => {
+    console.log('🔵 VideoCallChat mounted:', { currentUserId, targetUserId, isInitiator });
+    
+    const s = io('https://astrologer-backendcoll-chaat.onrender.com', {
+        transports: ['websocket', 'polling']
+    });
+    setSocket(s);
+    
+    s.on('connect', () => {
+        console.log('✅ Socket connected:', s.id);
+        console.log('📢 Emitting user-join:', currentUserId);
+        s.emit('user-join', String(currentUserId));
+    });
+    
+    s.on('connect_error', (err) => {
+        console.error('❌ Socket connection error:', err);
+    });
+    
+    // ✅ FIXED: incoming-call handler
+    s.on('incoming-call', (data) => {
+        console.log('🔔🔔🔔 INCOMING CALL RECEIVED in VideoCallChat!', data);
+        console.log('📞 From:', data.from, 'Target should be:', targetUserId);
         
-        const s = io('https://astrologer-backendcoll-chaat.onrender.com', {
-            transports: ['websocket', 'polling']
-        });
-        setSocket(s);
-        
-        s.on('connect', () => {
-            console.log('✅ Socket connected:', s.id);
-            console.log('📢 Emitting user-join:', currentUserId);
-            s.emit('user-join', String(currentUserId));
-        });
-        
-        s.on('connect_error', (err) => {
-            console.error('❌ Socket connection error:', err);
-        });
-        
-        // ✅ FIXED: incoming-call - NO confirm popup, store data instead
-        s.on('incoming-call', (data) => {
-            console.log('🔔🔔🔔 INCOMING CALL RECEIVED in VideoCallChat!', data);
-            console.log('📞 From:', data.from, 'Target should be:', targetUserId);
-            
-            if (data.from === targetUserId || String(data.from) === String(targetUserId)) {
-                console.log('✅ Match! Displaying incoming call UI');
-                setIncomingCallData(data);
-                setCallStatus('ringing');
-            } else {
-                console.log('❌ No match. data.from:', data.from, 'targetUserId:', targetUserId);
-            }
-        });
-        
-        // ✅ Handle call-answered (for initiator)
-        s.on('call-answered', async (data) => {
-            console.log('✅ call-answered received!', data);
-            
-            if (peerConnection.current && data.signal) {
-                try {
-                    let answerSignal = data.signal;
-                    if (typeof answerSignal === 'string') {
-                        answerSignal = JSON.parse(answerSignal);
-                    }
-                    const answerDesc = new RTCSessionDescription({
-                        type: answerSignal.type || 'answer',
-                        sdp: answerSignal.sdp || answerSignal
-                    });
-                    await peerConnection.current.setRemoteDescription(answerDesc);
-                    setCallStatus('connected');
-                    setInCall(true);
-                    console.log('✅ Voice call connected successfully!');
-                } catch (err) {
-                    console.error('Error setting answer:', err);
-                }
-            }
-        });
-        
-        // Handle answer-call (backward compatibility)
-        s.on('answer-call', async (data) => {
-            console.log('✅ answer-call received!', data);
-            
-            if (peerConnection.current && data.signal) {
-                try {
-                    let answerSignal = data.signal;
-                    if (typeof answerSignal === 'string') {
-                        answerSignal = JSON.parse(answerSignal);
-                    }
-                    const answerDesc = new RTCSessionDescription({
-                        type: answerSignal.type || 'answer',
-                        sdp: answerSignal.sdp || answerSignal
-                    });
-                    await peerConnection.current.setRemoteDescription(answerDesc);
-                    setCallStatus('connected');
-                    setInCall(true);
-                    console.log('✅ Voice call connected via answer-call!');
-                } catch (err) {
-                    console.error('Error setting answer:', err);
-                }
-            }
-        });
-        
-        s.on('call-ended', () => {
-            console.log('🔴 Call ended by other party');
-            endCall();
-        });
-        
-        s.on('private-message', (data) => {
-            console.log('💬 Message received:', data);
-            if (data.from === targetUserId || data.to === targetUserId) {
-                setMessages(prev => [...prev, data]);
-                setTimeout(() => {
-                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-            }
-        });
-        
-        loadMessages();
-        
-        // Auto-start call if initiator
-        if (isInitiator) {
-            setTimeout(() => startCall(), 1000);
+        if (data.from === targetUserId || String(data.from) === String(targetUserId)) {
+            console.log('✅ Match! Displaying incoming call UI');
+            setIncomingCallData(data);
+            setCallStatus('ringing');
+        } else {
+            console.log('❌ No match. data.from:', data.from, 'targetUserId:', targetUserId);
         }
+    });
+    
+    // ✅ Handle call-answered (for initiator)
+    s.on('call-answered', async (data) => {
+        console.log('✅ call-answered received!', data);
         
+        if (peerConnection.current && data.signal) {
+            try {
+                let answerSignal = data.signal;
+                if (typeof answerSignal === 'string') {
+                    answerSignal = JSON.parse(answerSignal);
+                }
+                const answerDesc = new RTCSessionDescription({
+                    type: answerSignal.type || 'answer',
+                    sdp: answerSignal.sdp || answerSignal
+                });
+                await peerConnection.current.setRemoteDescription(answerDesc);
+                setCallStatus('connected');
+                setInCall(true);
+                console.log('✅ Voice call connected successfully!');
+            } catch (err) {
+                console.error('Error setting answer:', err);
+            }
+        }
+    });
+    
+    s.on('answer-call', async (data) => {
+        console.log('✅ answer-call received!', data);
+        
+        if (peerConnection.current && data.signal) {
+            try {
+                let answerSignal = data.signal;
+                if (typeof answerSignal === 'string') {
+                    answerSignal = JSON.parse(answerSignal);
+                }
+                const answerDesc = new RTCSessionDescription({
+                    type: answerSignal.type || 'answer',
+                    sdp: answerSignal.sdp || answerSignal
+                });
+                await peerConnection.current.setRemoteDescription(answerDesc);
+                setCallStatus('connected');
+                setInCall(true);
+                console.log('✅ Voice call connected via answer-call!');
+            } catch (err) {
+                console.error('Error setting answer:', err);
+            }
+        }
+    });
+    
+    s.on('call-ended', () => {
+        console.log('🔴 Call ended by other party');
+        endCall();
+    });
+    
+    s.on('private-message', (data) => {
+        console.log('💬 Message received:', data);
+        if (data.from === targetUserId || data.to === targetUserId) {
+            setMessages(prev => [...prev, data]);
+            setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+    });
+    
+    loadMessages();
+    
+    // ✅✅✅ FIXED: Auto-start call ONLY after socket is connected ✅✅✅
+    if (isInitiator) {
+        const checkConnection = setInterval(() => {
+            if (s.connected) {
+                clearInterval(checkConnection);
+                console.log('✅ Socket connected, starting call now...');
+                startCall();
+            } else {
+                console.log('⏳ Waiting for socket connection...');
+            }
+        }, 500);
+        
+        // Cleanup interval on unmount
         return () => {
+            clearInterval(checkConnection);
             console.log('🔴 VideoCallChat unmounting');
-            if (socket) socket.close();
+            if (s) s.close();
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
             }
@@ -1735,7 +1743,19 @@ const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isIni
                 peerConnection.current.close();
             }
         };
-    }, []);
+    }
+    
+    return () => {
+        console.log('🔴 VideoCallChat unmounting');
+        if (s) s.close();
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+        if (peerConnection.current) {
+            peerConnection.current.close();
+        }
+    };
+}, []);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
