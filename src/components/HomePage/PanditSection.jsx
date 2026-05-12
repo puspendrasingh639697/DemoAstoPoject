@@ -762,164 +762,226 @@
 
 // export default PanditSection;
 
-import React, { useState, useEffect, useRef } from 'react';
-import io from 'socket.io-client';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import ChatBox from '../Chat/ChatBox';
+import VideoCallChat from '../VideoCallChat';
+import PanditCallReceiver from '../PanditCallReceiver';
 
-const PanditCallReceiver = () => {
+const PanditSection = () => {
+    const [pandits, setPandits] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedPandit, setSelectedPandit] = useState(null);
+    const [showChat, setShowChat] = useState(false);
+    const [showCallChat, setShowCallChat] = useState(false);
+    const [callChatUser, setCallChatUser] = useState(null);
     const { user } = useAuth();
-    const [socket, setSocket] = useState(null);
-    const [connected, setConnected] = useState(false);
-    const [incomingCall, setIncomingCall] = useState(null);
-    const [showPopup, setShowPopup] = useState(false);
-    const [callerId, setCallerId] = useState('');
-    const [debugLogs, setDebugLogs] = useState([]);
-    
-    const panditId = user?.phone || user?.mobile || '8888888888';
-    const audioRef = useRef(null);
 
-    const addLog = (msg, data = null) => {
-        const log = { time: new Date().toLocaleTimeString(), msg, data };
-        setDebugLogs(prev => [...prev, log]);
-        console.log(`[Pandit] ${msg}`, data || '');
-    };
+    const isPandit = user?.phone === '8888888888' || user?.mobile === '8888888888';
+    const currentUserId = user?.phone || user?.mobile || user?.id || '9999999999';
 
     useEffect(() => {
-        addLog(`🚀 Starting with ID: ${panditId}`);
-        
-        // Ringtone
-        audioRef.current = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
-        
-        const s = io('https://astrologer-backendcoll-chaat.onrender.com', {
-            transports: ['websocket', 'polling']
-        });
-        
-        setSocket(s);
-        
-        s.on('connect', () => {
-            addLog('✅ Socket CONNECTED');
-            setConnected(true);
-            s.emit('user-join', String(panditId));
-            addLog(`📤 Joined room: ${panditId}`);
-        });
-        
-        s.on('disconnect', () => {
-            addLog('⚠️ DISCONNECTED');
-            setConnected(false);
-        });
-        
-        // 👇 MOST IMPORTANT - Listen for incoming call
-        s.on('incoming-call', (data) => {
-            addLog('🔔🔔🔔 INCOMING CALL!', data);
-            const fromId = data.from;
-            setCallerId(fromId);
-            setIncomingCall(data);
-            setShowPopup(true);
-            
-            // Play ringtone
-            if (audioRef.current) {
-                audioRef.current.play().catch(e => console.log('Audio error:', e));
-            }
-            
-            // Alert
-            alert(`📞 INCOMING CALL from User ${fromId?.slice(-6)}!`);
-        });
-        
-        // Listen to all events for debugging
-        s.onAny((event, ...args) => {
-            if (event.includes('call')) {
-                addLog(`📡 Event: ${event}`, args[0]);
-            }
-        });
-        
-        return () => {
-            if (audioRef.current) audioRef.current.pause();
-            if (s) s.close();
-        };
-    }, [panditId]);
-    
-    const acceptCall = () => {
-        addLog(`✅ Accepting call from: ${callerId}`);
-        if (socket) {
-            socket.emit('call-accepted', { to: callerId, from: panditId });
-        }
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-        }
-        alert(`📞 Call connected with User ${callerId?.slice(-6)}!`);
-        setShowPopup(false);
-        setIncomingCall(null);
+        const demoPandits = [
+            { _id: '8888888888', firstName: 'Acharya Sheetal', experience: 17, languages: 'Hindi, English', skills: 'Vedic Astrology', rating: 5, image: '🔱' },
+            { _id: '7777777777', firstName: 'Pandit Suresh Mishra', experience: 10, languages: 'Hindi', skills: 'Vedic Astrology', rating: 5, image: '🔱' },
+            { _id: '6666666666', firstName: 'Acharya Shardha', experience: 15, languages: 'English', skills: 'Tarot, Vedic', rating: 5, image: '🔱' },
+            { _id: '5555555555', firstName: 'Pandit Anil Tripathi', experience: 22, languages: 'Hindi, Sanskrit', skills: 'Vedic Pujan', rating: 5, image: '🔱' },
+        ];
+        setPandits(demoPandits);
+        setLoading(false);
+    }, []);
+
+    const handleChat = (pandit) => {
+        console.log('💬 Opening chat with:', pandit.firstName);
+        setSelectedPandit(pandit);
+        setShowChat(true);
+        setShowCallChat(false);
     };
-    
-    const declineCall = () => {
-        addLog(`❌ Declining call from: ${callerId}`);
-        if (socket) {
-            socket.emit('end-call', { to: callerId, from: panditId });
-        }
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-        }
-        setShowPopup(false);
-        setIncomingCall(null);
+
+    const handleVideoCall = (pandit) => {
+        console.log('📞 Calling pandit:', pandit.firstName);
+        console.log('📞 Target ID:', pandit._id);
+        setCallChatUser(pandit);
+        setShowCallChat(true);
+        setShowChat(false);
     };
-    
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '64vh' }}>
+                <div>Loading Pandits...</div>
+            </div>
+        );
+    }
+
     return (
-        <>
-            {/* Fixed position debug panel - top right */}
-            <div style={{
-                position: 'fixed',
-                top: '10px',
-                right: '10px',
-                width: '300px',
-                background: '#1e1e2f',
-                borderRadius: '8px',
-                padding: '10px',
-                zIndex: 9999,
-                fontFamily: 'monospace',
-                fontSize: '10px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                border: connected ? '1px solid #4caf50' : '1px solid #f44336'
+        <div style={{ padding: '20px', marginTop: '70px' }}>
+            {/* Pandit Call Receiver - Only for Pandit */}
+            {isPandit && <PanditCallReceiver />}
+            
+            {/* Header */}
+            <div style={{ 
+                backgroundColor: '#fef3c7', 
+                padding: '16px', 
+                borderRadius: '8px', 
+                marginBottom: '32px', 
+                textAlign: 'center' 
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                    <span>📡 Pandit: {panditId.slice(-6)}</span>
-                    <span style={{ color: connected ? '#4caf50' : '#f44336' }}>
-                        {connected ? '🟢 ONLINE' : '🔴 OFFLINE'}
-                    </span>
-                </div>
-                <div style={{ maxHeight: '150px', overflow: 'auto', fontSize: '9px' }}>
-                    {debugLogs.slice(-5).map((log, i) => (
-                        <div key={i} style={{ borderTop: '1px solid #333', padding: '2px 0', color: '#aaa' }}>
-                            [{log.time}] {log.msg}
-                        </div>
-                    ))}
-                </div>
+                <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>
+                    Our Expert Pandits
+                </h2>
+                <p style={{ color: '#4b5563', marginTop: '8px' }}>
+                    Welcome {user?.name || user?.phone || 'User'}!
+                </p>
+                {isPandit && (
+                    <p style={{ color: '#16a34a', marginTop: '8px', fontWeight: 'bold' }}>
+                        🟢 You are Online as Pandit
+                    </p>
+                )}
             </div>
             
-            {/* Incoming Call Popup */}
-            {showPopup && (
-                <div style={{
-                    position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                    background: '#ff9800', padding: '30px', borderRadius: '15px',
-                    textAlign: 'center', zIndex: 10000, minWidth: '300px',
-                    boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-                }}>
-                    <div style={{ fontSize: '50px', marginBottom: '10px' }}>📞</div>
-                    <h2 style={{ color: 'white', margin: '10px 0' }}>Incoming Call!</h2>
-                    <p style={{ color: 'white' }}>User <strong>{callerId?.slice(-6)}</strong> is calling</p>
-                    <div style={{ marginTop: '20px', display: 'flex', gap: '15px', justifyContent: 'center' }}>
-                        <button onClick={acceptCall} style={{ background: '#4CAF50', color: 'white', padding: '10px 25px', border: 'none', borderRadius: '25px', cursor: 'pointer' }}>
-                            ✅ Accept
-                        </button>
-                        <button onClick={declineCall} style={{ background: '#f44336', color: 'white', padding: '10px 25px', border: 'none', borderRadius: '25px', cursor: 'pointer' }}>
-                            ❌ Decline
-                        </button>
+            {/* Pandit Cards Grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '24px'
+            }}>
+                {pandits.map((pandit) => (
+                    <div key={pandit._id} style={{
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                        overflow: 'hidden',
+                        border: '1px solid #e5e7eb'
+                    }}>
+                        {/* Header with gradient */}
+                        <div style={{
+                            background: 'linear-gradient(135deg, #fbbf24, #d97706)',
+                            padding: '20px',
+                            textAlign: 'center'
+                        }}>
+                            <div style={{
+                                width: '64px',
+                                height: '64px',
+                                backgroundColor: 'white',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 8px auto'
+                            }}>
+                                <span style={{ fontSize: '28px', color: '#d97706' }}>🔱</span>
+                            </div>
+                            <h3 style={{ color: 'white', fontWeight: 'bold', fontSize: '18px', margin: '8px 0 0 0' }}>
+                                {pandit.firstName}
+                            </h3>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
+                                {[...Array(5)].map((_, i) => (
+                                    <span key={i} style={{ color: '#fef08a', fontSize: '14px' }}>★</span>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Body */}
+                        <div style={{ padding: '16px' }}>
+                            <p style={{ color: '#374151', fontSize: '14px', margin: '4px 0' }}>
+                                📅 {pandit.experience} years
+                            </p>
+                            <p style={{ color: '#374151', fontSize: '14px', margin: '8px 0 4px' }}>
+                                🗣️ {pandit.languages}
+                            </p>
+                            <p style={{ color: '#374151', fontSize: '14px', margin: '8px 0 4px' }}>
+                                🔮 {pandit.skills}
+                            </p>
+                            
+                            {/* ✅ BUTTONS - YAHAN DIKHENGE AB */}
+                            {!isPandit && (
+                                <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                                    <button 
+                                        onClick={() => handleChat(pandit)}
+                                        style={{
+                                            flex: 1,
+                                            backgroundColor: '#f59e0b',
+                                            color: 'white',
+                                            padding: '8px 12px',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '6px'
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#d97706'}
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#f59e0b'}
+                                    >
+                                        💬 Chat
+                                    </button>
+                                    <button 
+                                        onClick={() => handleVideoCall(pandit)}
+                                        style={{
+                                            flex: 1,
+                                            backgroundColor: '#22c55e',
+                                            color: 'white',
+                                            padding: '8px 12px',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '6px'
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#16a34a'}
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#22c55e'}
+                                    >
+                                        📞 Call
+                                    </button>
+                                </div>
+                            )}
+                            
+                            {isPandit && (
+                                <div style={{ marginTop: '16px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
+                                    📞 Waiting for calls...
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                ))}
+            </div>
+
+            {/* Chat Box Modal */}
+            {showChat && selectedPandit && user && !isPandit && (
+                <ChatBox 
+                    currentUserId={currentUserId}
+                    panditId={selectedPandit._id}
+                    panditName={selectedPandit.firstName}
+                    onClose={() => {
+                        setShowChat(false);
+                        setSelectedPandit(null);
+                    }}
+                />
             )}
-        </>
+
+            {/* Voice Call UI - User Side */}
+            {showCallChat && callChatUser && user && !isPandit && (
+                <VideoCallChat
+                    currentUserId={currentUserId}
+                    targetUserId={callChatUser._id}
+                    targetName={callChatUser.firstName}
+                    isInitiator={true}
+                    onClose={() => {
+                        setShowCallChat(false);
+                        setCallChatUser(null);
+                    }}
+                />
+            )}
+        </div>
     );
 };
 
-export default PanditCallReceiver;
+export default PanditSection;
