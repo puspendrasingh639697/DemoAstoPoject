@@ -19,7 +19,7 @@
 
 //     useEffect(() => {
 //         const s = io('http://localhost:5000');
-//         setSocket(s);
+        // setSocket(s);
         
 //         s.on('connect', () => {
 //             setConnected(true);
