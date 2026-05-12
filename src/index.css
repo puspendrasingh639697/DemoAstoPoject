@@ -4,6 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+.animate-progress {
+  animation: progress 6s linear forwards;
+}
+
 /* Enable smooth scrolling globally */
 html {
   scroll-behavior: smooth;

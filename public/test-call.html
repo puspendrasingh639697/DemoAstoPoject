@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pandit Call Test</title>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a1a1a; color: white; text-align: center; }
+        .online { background: green; padding: 5px 10px; border-radius: 20px; display: inline-block; }
+        .offline { background: red; padding: 5px 10px; border-radius: 20px; display: inline-block; }
+        .popup { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .popup-box { background: linear-gradient(135deg, #eab308, #f59e0b); border-radius: 20px; padding: 30px; text-align: center; }
+        button { padding: 10px 20px; margin: 5px; font-size: 18px; border: none; border-radius: 40px; cursor: pointer; }
+        .accept { background: green; color: white; }
+        .decline { background: red; color: white; }
+        .log-box { background: #333; margin: 20px auto; padding: 10px; width: 500px; height: 300px; overflow-y: auto; text-align: left; border-radius: 10px; }
+        .log { border-left: 3px solid #eab308; padding: 5px; margin: 5px; background: #444; }
+    </style>
+</head>
+<body>
+    <h1>📞 Pandit Call Receiver Test Page</h1>
+    <p>Your ID: <strong id="panditId">8888888888</strong></p>
+    <div id="status" class="offline">Connecting...</div>
+    
+    <div class="log-box" id="logs"></div>
+    
+    <div style="margin-top: 20px; padding: 10px; background: #333; border-radius: 10px;">
+        <p>📌 <strong>Instructions:</strong></p>
+        <p>1. इस पेज को खुला रखें</p>
+        <p>2. User से Call करें (9999999999 → /pandits → Call button)</p>
+        <p>3. Call आने पर POPUP दिखेगा</p>
+    </div>
+
+    <div id="callPopup" style="display: none;"></div>
+
+    <script>
+        const panditId = '8888888888';
+        let socket = null;
+        
+        function addLog(msg) {
+            const logsDiv = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            const logDiv = document.createElement('div');
+            logDiv.className = 'log';
+            logDiv.innerHTML = `<span style="color:#888">[${time}]</span> ${msg}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(msg);
+        }
+        
+        function showCallPopup(callerId) {
+            const popupDiv = document.getElementById('callPopup');
+            popupDiv.innerHTML = `
+                <div class="popup">
+                    <div class="popup-box">
+                        <div style="font-size:60px">📞</div>
+                        <h2>Incoming Call!</h2>
+                        <p>User ${callerId.slice(-6)} is calling you</p>
+                        <button class="accept" onclick="acceptCall()">✅ Accept</button>
+                        <button class="decline" onclick="declineCall()">❌ Decline</button>
+                    </div>
+                </div>
+            `;
+            popupDiv.style.display = 'block';
+        }
+        
+        function acceptCall() {
+            addLog('✅ Call ACCEPTED!');
+            alert('Call Accepted! Video call will start...');
+            document.getElementById('callPopup').style.display = 'none';
+        }
+        
+        function declineCall() {
+            addLog('❌ Call DECLINED!');
+            if (socket) {
+                socket.emit('end-call', { to: '9999999999' });
+            }
+            document.getElementById('callPopup').style.display = 'none';
+        }
+        
+        function connect() {
+            addLog('🔵 Connecting to server...');
+            
+            socket = io('https://astrologer-backendcoll-chaat.onrender.com');
+            
+            socket.on('connect', () => {
+                addLog('✅ Socket Connected! ID: ' + socket.id);
+                document.getElementById('status').className = 'online';
+                document.getElementById('status').innerHTML = '🟢 ONLINE - Ready to receive calls';
+                socket.emit('user-join', panditId);
+                addLog('📢 Registered as Pandit: ' + panditId);
+            });
+            
+            socket.on('incoming-call', (data) => {
+                addLog('🔔🔔🔔 INCOMING CALL DETECTED!');
+                addLog('📞 Caller: ' + data.from);
+                showCallPopup(data.from);
+                
+                // Browser Notification
+                if (Notification.permission === 'granted') {
+                    new Notification('📞 Incoming Call!', {
+                        body: 'User ' + data.from.slice(-6) + ' is calling you'
+                    });
+                }
+            });
+            
+            socket.on('connect_error', (err) => {
+                addLog('❌ Connection Error: ' + err.message);
+                document.getElementById('status').className = 'offline';
+                document.getElementById('status').innerHTML = '🔴 OFFLINE - Connection failed';
+            });
+            
+            socket.on('disconnect', () => {
+                addLog('🔴 Disconnected from server');
+                document.getElementById('status').className = 'offline';
+                document.getElementById('status').innerHTML = '🔴 OFFLINE - Disconnected';
+            });
+        }
+        
+        // Request notification permission
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        
+        // Start connection
+        connect();
+    </script>
+</body>
+</html>
