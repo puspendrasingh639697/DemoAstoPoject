@@ -265,22 +265,21 @@ const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isIni
         });
 
         s.on('call-answered', async (data) => {
-            console.log('✅ Call answered');
-            if (peerConnection.current && data.signal) {
-                try {
-                    const answerSignal = typeof data.signal === 'string' ? JSON.parse(data.signal) : data.signal;
-                    const answerDesc = new RTCSessionDescription({
-                        type: answerSignal.type || 'answer',
-                        sdp: answerSignal.sdp || answerSignal
-                    });
-                    await peerConnection.current.setRemoteDescription(answerDesc);
-                    setCallStatus('connected');
-                    setInCall(true);
-                } catch (err) {
-                    console.error('Error setting answer:', err);
-                }
-            }
-        });
+    console.log('✅ Call answered by', targetName);
+    console.log('📞 Signal received:', data);
+    
+    if (peerConnection.current && data.signal) {
+        try {
+            const answerDesc = new RTCSessionDescription(data.signal);
+            await peerConnection.current.setRemoteDescription(answerDesc);
+            setCallStatus('connected');
+            setInCall(true);
+            console.log('✅ Voice call connected!');
+        } catch (err) {
+            console.error('Error setting answer:', err);
+        }
+    }
+});
 
         s.on('call-ended', () => {
             console.log('🔴 Call ended');
