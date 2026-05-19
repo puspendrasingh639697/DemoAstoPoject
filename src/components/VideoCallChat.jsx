@@ -1,1575 +1,183 @@
-
-
-// // // import React, { useState, useEffect, useRef } from 'react';
-// // // import io from 'socket.io-client';
-// // // import { FaPhoneSlash, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
-
-// // // const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isInitiator = false }) => {
-// // //     const [socket, setSocket] = useState(null);
-// // //     const [messages, setMessages] = useState([]);
-// // //     const [newMessage, setNewMessage] = useState('');
-// // //     const [inCall, setInCall] = useState(false);
-// // //     const [callStatus, setCallStatus] = useState('idle');
-// // //     const [localStream, setLocalStream] = useState(null);
-// // //     const [isMuted, setIsMuted] = useState(false);
-    
-// // //     const messagesEndRef = useRef(null);
-// // //     const peerConnection = useRef(null);
-// // //     const audioRef = useRef();
-
-// // //     const configuration = {
-// // //         iceServers: [
-// // //             { urls: 'stun:stun.l.google.com:19302' },
-// // //             { urls: 'stun:stun1.l.google.com:19302' },
-// // //             { urls: 'stun:stun2.l.google.com:19302' }
-// // //         ]
-// // //     };
-
-// // //     const loadMessages = async () => {
-// // //         try {
-// // //             const res = await fetch(`https://astrologer-backendcoll-chaat.onrender.com/api/chat/messages/${currentUserId}/${targetUserId}`);
-// // //             const data = await res.json();
-// // //             if (data.success && data.data) {
-// // //                 const sorted = data.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-// // //                 setMessages(sorted);
-// // //             }
-// // //         } catch (err) {
-// // //             console.error('Error loading messages:', err);
-// // //         }
-// // //     };
-
-// // //     const getAudio = async () => {
-// // //         try {
-// // //             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-// // //             setLocalStream(stream);
-// // //             console.log('✅ Microphone Working');
-// // //             return stream;
-// // //         } catch (err) {
-// // //             console.error('Microphone error:', err);
-// // //             alert('Please allow microphone access');
-// // //             return null;
-// // //         }
-// // //     };
-
-// // //     const startCall = async () => {
-// // //         console.log('📞 Starting voice call to', targetName);
-// // //         setCallStatus('calling');
-        
-// // //         const stream = await getAudio();
-// // //         if (!stream) {
-// // //             console.error('❌ No microphone access');
-// // //             setCallStatus('idle');
-// // //             return;
-// // //         }
-        
-// // //         setLocalStream(stream);
-        
-// // //         peerConnection.current = new RTCPeerConnection(configuration);
-        
-// // //         stream.getTracks().forEach(track => {
-// // //             peerConnection.current.addTrack(track, stream);
-// // //         });
-        
-// // //         peerConnection.current.ontrack = (event) => {
-// // //             console.log('🎤 Remote audio received!');
-// // //             if (audioRef.current) {
-// // //                 audioRef.current.srcObject = event.streams[0];
-// // //                 audioRef.current.play().catch(e => console.log('Audio play error:', e));
-// // //             }
-// // //             setInCall(true);
-// // //             setCallStatus('connected');
-// // //         };
-        
-// // //         peerConnection.current.oniceconnectionstatechange = () => {
-// // //             console.log('ICE State:', peerConnection.current.iceConnectionState);
-// // //             if (peerConnection.current.iceConnectionState === 'connected') {
-// // //                 console.log('✅ Voice call connected!');
-// // //             } else if (peerConnection.current.iceConnectionState === 'failed') {
-// // //                 console.log('❌ Voice call failed');
-// // //                 alert('Connection failed. Please try again.');
-// // //                 endCall();
-// // //             }
-// // //         };
-        
-// // //         const offer = await peerConnection.current.createOffer();
-// // //         await peerConnection.current.setLocalDescription(offer);
-        
-// // //         if (socket && socket.connected) {
-// // //             socket.emit('call-user', {
-// // //                 to: targetUserId,
-// // //                 from: currentUserId,
-// // //                 signal: {
-// // //                     type: offer.type,
-// // //                     sdp: offer.sdp
-// // //                 }
-// // //             });
-// // //         }
-        
-// // //         setCallStatus('ringing');
-        
-// // //         setTimeout(() => {
-// // //             if (callStatus === 'ringing') {
-// // //                 setCallStatus('idle');
-// // //                 alert('No answer from ' + targetName);
-// // //                 endCall();
-// // //             }
-// // //         }, 30000);
-// // //     };
-
-// // //     const acceptCall = async (signal) => {
-// // //         console.log('📞 Accepting voice call from', targetName);
-// // //         setCallStatus('connecting');
-        
-// // //         const stream = await getAudio();
-// // //         if (!stream) {
-// // //             console.error('❌ No microphone access');
-// // //             setCallStatus('idle');
-// // //             return;
-// // //         }
-        
-// // //         setLocalStream(stream);
-        
-// // //         peerConnection.current = new RTCPeerConnection(configuration);
-        
-// // //         stream.getTracks().forEach(track => {
-// // //             peerConnection.current.addTrack(track, stream);
-// // //         });
-        
-// // //         peerConnection.current.ontrack = (event) => {
-// // //             console.log('🎤 Remote audio received!');
-// // //             if (audioRef.current) {
-// // //                 audioRef.current.srcObject = event.streams[0];
-// // //                 audioRef.current.play().catch(e => console.log('Audio play error:', e));
-// // //             }
-// // //             setInCall(true);
-// // //             setCallStatus('connected');
-// // //         };
-        
-// // //         peerConnection.current.oniceconnectionstatechange = () => {
-// // //             console.log('ICE State:', peerConnection.current.iceConnectionState);
-// // //             if (peerConnection.current.iceConnectionState === 'connected') {
-// // //                 console.log('✅ Voice call connected!');
-// // //             } else if (peerConnection.current.iceConnectionState === 'failed') {
-// // //                 console.log('❌ Voice call failed');
-// // //                 endCall();
-// // //             }
-// // //         };
-        
-// // //         try {
-// // //             let remoteSignal = signal;
-// // //             if (typeof signal === 'string') {
-// // //                 remoteSignal = JSON.parse(signal);
-// // //             }
-            
-// // //             const remoteDesc = new RTCSessionDescription({
-// // //                 type: remoteSignal.type || 'offer',
-// // //                 sdp: remoteSignal.sdp || remoteSignal
-// // //             });
-            
-// // //             await peerConnection.current.setRemoteDescription(remoteDesc);
-// // //             const answer = await peerConnection.current.createAnswer();
-// // //             await peerConnection.current.setLocalDescription(answer);
-            
-// // //             if (socket) {
-// // //                 socket.emit('answer-call', { 
-// // //                     to: targetUserId, 
-// // //                     signal: {
-// // //                         type: answer.type,
-// // //                         sdp: answer.sdp
-// // //                     }
-// // //                 });
-// // //             }
-// // //             setCallStatus('connected');
-// // //         } catch (err) {
-// // //             console.error('Error accepting call:', err);
-// // //             setCallStatus('idle');
-// // //         }
-// // //     };
-
-// // //     const endCall = () => {
-// // //         console.log('🔴 Ending voice call');
-// // //         if (peerConnection.current) {
-// // //             peerConnection.current.close();
-// // //             peerConnection.current = null;
-// // //         }
-// // //         if (localStream) {
-// // //             localStream.getTracks().forEach(track => track.stop());
-// // //             setLocalStream(null);
-// // //         }
-// // //         if (socket) {
-// // //             socket.emit('end-call', { to: targetUserId });
-// // //         }
-// // //         setInCall(false);
-// // //         setCallStatus('idle');
-// // //         onClose();
-// // //     };
-
-// // //     const toggleMute = () => {
-// // //         if (localStream) {
-// // //             const audioTrack = localStream.getAudioTracks()[0];
-// // //             if (audioTrack) {
-// // //                 audioTrack.enabled = !audioTrack.enabled;
-// // //                 setIsMuted(!audioTrack.enabled);
-// // //                 console.log(isMuted ? '🔊 Unmuted' : '🔇 Muted');
-// // //             }
-// // //         }
-// // //     };
-
-// // //     const sendMessage = () => {
-// // //         if (!newMessage.trim()) return;
-// // //         if (!socket || !socket.connected) {
-// // //             alert('Not connected to server');
-// // //             return;
-// // //         }
-        
-// // //         socket.emit('private-message', {
-// // //             to: targetUserId,
-// // //             from: currentUserId,
-// // //             message: newMessage
-// // //         });
-        
-// // //         setMessages(prev => [...prev, {
-// // //             from: currentUserId,
-// // //             message: newMessage,
-// // //             time: new Date(),
-// // //             createdAt: new Date()
-// // //         }]);
-// // //         setNewMessage('');
-        
-// // //         setTimeout(() => {
-// // //             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-// // //         }, 100);
-// // //     };
-
-// // //     useEffect(() => {
-// // //         const s = io('https://astrologer-backendcoll-chaat.onrender.com');
-// // //         setSocket(s);
-        
-// // //         s.on('connect', () => {
-// // //             console.log('✅ Socket connected:', s.id);
-// // //             s.emit('user-join', currentUserId);
-// // //         });
-
-// // //         s.on('incoming-call', async (data) => {
-// // //             console.log('📞 INCOMING VOICE CALL:', data);
-// // //             if (data.from === targetUserId && !isInitiator) {
-// // //                 setCallStatus('ringing');
-// // //                 const accept = window.confirm(`📞 Incoming voice call from ${targetName}. Accept?`);
-// // //                 if (accept) {
-// // //                     await acceptCall(data.signal);
-// // //                 } else {
-// // //                     s.emit('end-call', { to: data.from });
-// // //                     onClose();
-// // //                 }
-// // //             }
-// // //         });
-
-// // //         s.on('call-answered', async (data) => {
-// // //     console.log('✅ Call answered by', targetName);
-// // //     console.log('📞 Signal received:', data);
-    
-// // //     if (peerConnection.current && data.signal) {
-// // //         try {
-// // //             const answerDesc = new RTCSessionDescription(data.signal);
-// // //             await peerConnection.current.setRemoteDescription(answerDesc);
-// // //             setCallStatus('connected');
-// // //             setInCall(true);
-// // //             console.log('✅ Voice call connected!');
-// // //         } catch (err) {
-// // //             console.error('Error setting answer:', err);
-// // //         }
-// // //     }
-// // // });
-
-// // //         s.on('call-ended', () => {
-// // //             console.log('🔴 Call ended');
-// // //             endCall();
-// // //         });
-
-// // //         s.on('private-message', (data) => {
-// // //             if (data.from === targetUserId || data.to === targetUserId) {
-// // //                 setMessages(prev => [...prev, data]);
-// // //                 setTimeout(() => {
-// // //                     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-// // //                 }, 100);
-// // //             }
-// // //         });
-
-// // //         loadMessages();
-
-// // //         if (isInitiator) {
-// // //             setTimeout(() => startCall(), 1000);
-// // //         }
-
-// // //         return () => {
-// // //             if (socket) socket.close();
-// // //             if (localStream) {
-// // //                 localStream.getTracks().forEach(track => track.stop());
-// // //             }
-// // //             if (peerConnection.current) {
-// // //                 peerConnection.current.close();
-// // //             }
-// // //         };
-// // //     }, []);
-
-// // //     useEffect(() => {
-// // //         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-// // //     }, [messages]);
-
-// // //     const getStatusText = () => {
-// // //         switch(callStatus) {
-// // //             case 'calling': return '📞 Calling...';
-// // //             case 'ringing': return '🔔 Ringing...';
-// // //             case 'connected': return '🎤 Voice Call Connected';
-// // //             case 'connecting': return '🔄 Connecting...';
-// // //             default: return '💬 Chat';
-// // //         }
-// // //     };
-
-// // //     const getStatusColor = () => {
-// // //         if (callStatus === 'connected') return '#4CAF50';
-// // //         if (callStatus === 'calling') return '#ff9800';
-// // //         if (callStatus === 'ringing') return '#ff9800';
-// // //         return '#ff9800';
-// // //     };
-
-// // //     return (
-// // //         <div style={{
-// // //             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-// // //             width: '450px', height: '580px', background: '#1a1a1a', borderRadius: '15px',
-// // //             zIndex: 2000, display: 'flex', flexDirection: 'column', 
-// // //             border: `2px solid ${getStatusColor()}`,
-// // //             boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-// // //         }}>
-// // //             {/* Header */}
-// // //             <div style={{ background: getStatusColor(), padding: '15px', borderRadius: '13px 13px 0 0', textAlign: 'center' }}>
-// // //                 <div style={{ fontWeight: 'bold', fontSize: '18px', color: 'white' }}>{targetName}</div>
-// // //                 <div style={{ fontSize: '12px', color: 'white', opacity: 0.8 }}>{getStatusText()}</div>
-// // //             </div>
-            
-// // //             {/* Audio Element */}
-// // //             <audio ref={audioRef} autoPlay style={{ display: 'none' }} />
-            
-// // //             {/* Call Status Image */}
-// // //             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', background: '#2d2d2d' }}>
-// // //                 <div style={{
-// // //                     width: '120px', height: '120px', borderRadius: '50%', background: '#075E54',
-// // //                     display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'
-// // //                 }}>
-// // //                     <FaMicrophone size={50} color="white" />
-// // //                 </div>
-// // //                 <div style={{ color: 'white', textAlign: 'center' }}>
-// // //                     {callStatus === 'connected' && <div>🎤 Voice call connected</div>}
-// // //                     {callStatus === 'calling' && <div>📞 Calling {targetName}...</div>}
-// // //                     {callStatus === 'ringing' && <div>🔔 Incoming voice call...</div>}
-// // //                     {callStatus === 'connecting' && <div>🔄 Connecting...</div>}
-// // //                 </div>
-// // //             </div>
-            
-// // //             {/* Call Controls */}
-// // //             <div style={{ padding: '20px', display: 'flex', justifyContent: 'center', gap: '20px', background: '#1a1a1a' }}>
-// // //                 {inCall && (
-// // //                     <button onClick={toggleMute} style={{
-// // //                         background: isMuted ? '#f44336' : '#555',
-// // //                         color: 'white', padding: '12px', border: 'none', borderRadius: '50%',
-// // //                         cursor: 'pointer', width: '50px', height: '50px'
-// // //                     }}>
-// // //                         {isMuted ? <FaMicrophoneSlash size={20} /> : <FaMicrophone size={20} />}
-// // //                     </button>
-// // //                 )}
-// // //                 <button onClick={endCall} style={{
-// // //                     background: '#f44336', color: 'white', padding: '12px 24px', border: 'none',
-// // //                     borderRadius: '30px', cursor: 'pointer', fontSize: '16px',
-// // //                     display: 'flex', alignItems: 'center', gap: '8px'
-// // //                 }}>
-// // //                     <FaPhoneSlash /> End Call
-// // //                 </button>
-// // //             </div>
-            
-// // //             {/* Chat Area */}
-// // //             <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', background: '#2d2d2d', borderTop: '1px solid #444' }}>
-// // //                 <div style={{ height: '180px', overflow: 'auto', marginBottom: '10px', padding: '10px' }}>
-// // //                     {messages.length === 0 && (
-// // //                         <div style={{ textAlign: 'center', color: '#888', marginTop: '30px' }}>
-// // //                             💬 No messages yet
-// // //                         </div>
-// // //                     )}
-// // //                     {messages.map((msg, i) => (
-// // //                         <div key={i} style={{ textAlign: msg.from === currentUserId ? 'right' : 'left', marginBottom: '10px' }}>
-// // //                             <div style={{
-// // //                                 display: 'inline-block',
-// // //                                 maxWidth: '80%',
-// // //                                 background: msg.from === currentUserId ? '#ff9800' : '#555',
-// // //                                 padding: '8px 12px',
-// // //                                 borderRadius: '15px',
-// // //                                 color: 'white',
-// // //                                 wordWrap: 'break-word'
-// // //                             }}>
-// // //                                 {msg.message}
-// // //                             </div>
-// // //                             <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>
-// // //                                 {new Date(msg.createdAt || msg.time).toLocaleTimeString()}
-// // //                             </div>
-// // //                         </div>
-// // //                     ))}
-// // //                     <div ref={messagesEndRef} />
-// // //                 </div>
-                
-// // //                 {/* Input Area */}
-// // //                 <div style={{ display: 'flex', gap: '10px', padding: '10px', background: '#1a1a1a', borderRadius: '10px' }}>
-// // //                     <input
-// // //                         type="text"
-// // //                         value={newMessage}
-// // //                         onChange={e => setNewMessage(e.target.value)}
-// // //                         onKeyPress={e => e.key === 'Enter' && sendMessage()}
-// // //                         style={{ flex: 1, padding: '10px', borderRadius: '25px', border: 'none', outline: 'none', fontSize: '14px', background: '#fff', color: '#000' }}
-// // //                         placeholder="Type a message..."
-// // //                     />
-// // //                     <button onClick={sendMessage} style={{ background: '#ff9800', border: 'none', padding: '8px 15px', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold', color: '#fff' }}>
-// // //                         Send
-// // //                     </button>
-// // //                     {!inCall && callStatus !== 'ringing' && callStatus !== 'calling' && (
-// // //                         <button onClick={startCall} style={{ background: '#4CAF50', border: 'none', padding: '8px 15px', borderRadius: '25px', cursor: 'pointer', color: 'white', fontWeight: 'bold' }}>
-// // //                             📞 Call
-// // //                         </button>
-// // //                     )}
-// // //                 </div>
-// // //             </div>
-// // //         </div>
-// // //     );
-// // // };
-
-// // // export default VideoCallChat;
-
-// // import React, { useState, useEffect, useRef } from 'react';
-// // import io from 'socket.io-client';
-// // import { FaPhoneSlash, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
-
-// // const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isInitiator = false }) => {
-// //     const [socket, setSocket] = useState(null);
-// //     const [messages, setMessages] = useState([]);
-// //     const [newMessage, setNewMessage] = useState('');
-// //     const [inCall, setInCall] = useState(false);
-// //     const [callStatus, setCallStatus] = useState('idle');
-// //     const [localStream, setLocalStream] = useState(null);
-// //     const [isMuted, setIsMuted] = useState(false);
-    
-// //     const messagesEndRef = useRef(null);
-// //     const peerConnection = useRef(null);
-// //     const audioRef = useRef();
-
-// //     const configuration = {
-// //         iceServers: [
-// //             { urls: 'stun:stun.l.google.com:19302' },
-// //             { urls: 'stun:stun1.l.google.com:19302' },
-// //             { urls: 'stun:stun2.l.google.com:19302' }
-// //         ]
-// //     };
-
-// //     const loadMessages = async () => {
-// //         try {
-// //             const res = await fetch(`https://astrologer-backendcoll-chaat.onrender.com/api/chat/messages/${currentUserId}/${targetUserId}`);
-// //             const data = await res.json();
-// //             if (data.success && data.data) {
-// //                 const sorted = data.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-// //                 setMessages(sorted);
-// //             }
-// //         } catch (err) {
-// //             console.error('Error loading messages:', err);
-// //         }
-// //     };
-
-// //     const getAudio = async () => {
-// //         try {
-// //             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-// //             setLocalStream(stream);
-// //             console.log('✅ Microphone Working');
-// //             return stream;
-// //         } catch (err) {
-// //             console.error('Microphone error:', err);
-// //             alert('Please allow microphone access');
-// //             return null;
-// //         }
-// //     };
-
-// //     const startCall = async () => {
-// //         console.log('📞 Starting voice call to', targetName);
-// //         setCallStatus('calling');
-        
-// //         const stream = await getAudio();
-// //         if (!stream) {
-// //             console.error('❌ No microphone access');
-// //             setCallStatus('idle');
-// //             return;
-// //         }
-        
-// //         setLocalStream(stream);
-        
-// //         peerConnection.current = new RTCPeerConnection(configuration);
-        
-// //         stream.getTracks().forEach(track => {
-// //             peerConnection.current.addTrack(track, stream);
-// //         });
-        
-// //         peerConnection.current.ontrack = (event) => {
-// //             console.log('🎤 Remote audio received!');
-// //             if (audioRef.current) {
-// //                 audioRef.current.srcObject = event.streams[0];
-// //                 audioRef.current.play().catch(e => console.log('Audio play error:', e));
-// //             }
-// //             setInCall(true);
-// //             setCallStatus('connected');
-// //         };
-        
-// //         peerConnection.current.oniceconnectionstatechange = () => {
-// //             console.log('ICE State:', peerConnection.current.iceConnectionState);
-// //             if (peerConnection.current.iceConnectionState === 'connected') {
-// //                 console.log('✅ Voice call connected!');
-// //             } else if (peerConnection.current.iceConnectionState === 'failed') {
-// //                 console.log('❌ Voice call failed');
-// //                 alert('Connection failed. Please try again.');
-// //                 endCall();
-// //             }
-// //         };
-        
-// //         const offer = await peerConnection.current.createOffer();
-// //         await peerConnection.current.setLocalDescription(offer);
-        
-// //         if (socket && socket.connected) {
-// //             socket.emit('call-user', {
-// //                 to: targetUserId,
-// //                 from: currentUserId,
-// //                 signal: {
-// //                     type: offer.type,
-// //                     sdp: offer.sdp
-// //                 }
-// //             });
-// //         }
-        
-// //         setCallStatus('ringing');
-        
-// //         setTimeout(() => {
-// //             if (callStatus === 'ringing') {
-// //                 setCallStatus('idle');
-// //                 alert('No answer from ' + targetName);
-// //                 endCall();
-// //             }
-// //         }, 30000);
-// //     };
-
-// //     const acceptCall = async (signal) => {
-// //         console.log('📞 Accepting voice call from', targetName);
-// //         setCallStatus('connecting');
-        
-// //         const stream = await getAudio();
-// //         if (!stream) {
-// //             console.error('❌ No microphone access');
-// //             setCallStatus('idle');
-// //             return;
-// //         }
-        
-// //         setLocalStream(stream);
-        
-// //         peerConnection.current = new RTCPeerConnection(configuration);
-        
-// //         stream.getTracks().forEach(track => {
-// //             peerConnection.current.addTrack(track, stream);
-// //         });
-        
-// //         peerConnection.current.ontrack = (event) => {
-// //             console.log('🎤 Remote audio received!');
-// //             if (audioRef.current) {
-// //                 audioRef.current.srcObject = event.streams[0];
-// //                 audioRef.current.play().catch(e => console.log('Audio play error:', e));
-// //             }
-// //             setInCall(true);
-// //             setCallStatus('connected');
-// //         };
-        
-// //         peerConnection.current.oniceconnectionstatechange = () => {
-// //             console.log('ICE State:', peerConnection.current.iceConnectionState);
-// //             if (peerConnection.current.iceConnectionState === 'connected') {
-// //                 console.log('✅ Voice call connected!');
-// //             } else if (peerConnection.current.iceConnectionState === 'failed') {
-// //                 console.log('❌ Voice call failed');
-// //                 endCall();
-// //             }
-// //         };
-        
-// //         try {
-// //             let remoteSignal = signal;
-// //             if (typeof signal === 'string') {
-// //                 remoteSignal = JSON.parse(signal);
-// //             }
-            
-// //             const remoteDesc = new RTCSessionDescription({
-// //                 type: remoteSignal.type || 'offer',
-// //                 sdp: remoteSignal.sdp || remoteSignal
-// //             });
-            
-// //             await peerConnection.current.setRemoteDescription(remoteDesc);
-// //             const answer = await peerConnection.current.createAnswer();
-// //             await peerConnection.current.setLocalDescription(answer);
-            
-// //             if (socket) {
-// //                 socket.emit('answer-call', { 
-// //                     to: targetUserId, 
-// //                     signal: {
-// //                         type: answer.type,
-// //                         sdp: answer.sdp
-// //                     }
-// //                 });
-// //             }
-// //             setCallStatus('connected');
-// //             setInCall(true);
-// //         } catch (err) {
-// //             console.error('Error accepting call:', err);
-// //             setCallStatus('idle');
-// //         }
-// //     };
-
-// //     const endCall = () => {
-// //         console.log('🔴 Ending voice call');
-// //         if (peerConnection.current) {
-// //             peerConnection.current.close();
-// //             peerConnection.current = null;
-// //         }
-// //         if (localStream) {
-// //             localStream.getTracks().forEach(track => track.stop());
-// //             setLocalStream(null);
-// //         }
-// //         if (socket) {
-// //             socket.emit('end-call', { to: targetUserId });
-// //         }
-// //         setInCall(false);
-// //         setCallStatus('idle');
-// //         onClose();
-// //     };
-
-// //     const toggleMute = () => {
-// //         if (localStream) {
-// //             const audioTrack = localStream.getAudioTracks()[0];
-// //             if (audioTrack) {
-// //                 audioTrack.enabled = !audioTrack.enabled;
-// //                 setIsMuted(!audioTrack.enabled);
-// //                 console.log(isMuted ? '🔊 Unmuted' : '🔇 Muted');
-// //             }
-// //         }
-// //     };
-
-// //     const sendMessage = () => {
-// //         if (!newMessage.trim()) return;
-// //         if (!socket || !socket.connected) {
-// //             alert('Not connected to server');
-// //             return;
-// //         }
-        
-// //         socket.emit('private-message', {
-// //             to: targetUserId,
-// //             from: currentUserId,
-// //             message: newMessage
-// //         });
-        
-// //         setMessages(prev => [...prev, {
-// //             from: currentUserId,
-// //             message: newMessage,
-// //             time: new Date(),
-// //             createdAt: new Date()
-// //         }]);
-// //         setNewMessage('');
-        
-// //         setTimeout(() => {
-// //             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-// //         }, 100);
-// //     };
-
-// //     useEffect(() => {
-// //         const s = io('https://astrologer-backendcoll-chaat.onrender.com');
-// //         setSocket(s);
-        
-// //         s.on('connect', () => {
-// //             console.log('✅ Socket connected:', s.id);
-// //             s.emit('user-join', currentUserId);
-// //         });
-
-// //         s.on('incoming-call', async (data) => {
-// //             console.log('📞 INCOMING VOICE CALL:', data);
-// //             if (data.from === targetUserId && !isInitiator) {
-// //                 setCallStatus('ringing');
-// //                 const accept = window.confirm(`📞 Incoming voice call from ${targetName}. Accept?`);
-// //                 if (accept) {
-// //                     await acceptCall(data.signal);
-// //                 } else {
-// //                     s.emit('end-call', { to: data.from });
-// //                     onClose();
-// //                 }
-// //             }
-// //         });
-
-// //         s.on('call-answered', async (data) => {
-// //             console.log('✅ Call answered by', targetName);
-// //             console.log('📞 Signal received:', data);
-            
-// //             if (peerConnection.current && data.signal) {
-// //                 try {
-// //                     let answerSignal = data.signal;
-// //                     if (typeof answerSignal === 'string') {
-// //                         answerSignal = JSON.parse(answerSignal);
-// //                     }
-// //                     const answerDesc = new RTCSessionDescription({
-// //                         type: answerSignal.type || 'answer',
-// //                         sdp: answerSignal.sdp || answerSignal
-// //                     });
-// //                     await peerConnection.current.setRemoteDescription(answerDesc);
-// //                     setCallStatus('connected');
-// //                     setInCall(true);
-// //                     console.log('✅ Voice call connected!');
-// //                 } catch (err) {
-// //                     console.error('Error setting answer:', err);
-// //                 }
-// //             }
-// //         });
-
-// //         s.on('call-ended', () => {
-// //             console.log('🔴 Call ended');
-// //             endCall();
-// //         });
-
-// //         s.on('private-message', (data) => {
-// //             if (data.from === targetUserId || data.to === targetUserId) {
-// //                 setMessages(prev => [...prev, data]);
-// //                 setTimeout(() => {
-// //                     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-// //                 }, 100);
-// //             }
-// //         });
-
-// //         loadMessages();
-
-// //         if (isInitiator) {
-// //             setTimeout(() => startCall(), 1000);
-// //         }
-
-// //         return () => {
-// //             if (socket) socket.close();
-// //             if (localStream) {
-// //                 localStream.getTracks().forEach(track => track.stop());
-// //             }
-// //             if (peerConnection.current) {
-// //                 peerConnection.current.close();
-// //             }
-// //         };
-// //     }, []);
-
-// //     useEffect(() => {
-// //         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-// //     }, [messages]);
-
-// //     const getStatusText = () => {
-// //         switch(callStatus) {
-// //             case 'calling': return '📞 Calling...';
-// //             case 'ringing': return '🔔 Ringing...';
-// //             case 'connected': return '🎤 Voice Call Connected';
-// //             case 'connecting': return '🔄 Connecting...';
-// //             default: return '💬 Chat';
-// //         }
-// //     };
-
-// //     const getStatusColor = () => {
-// //         if (callStatus === 'connected') return '#4CAF50';
-// //         if (callStatus === 'calling') return '#ff9800';
-// //         if (callStatus === 'ringing') return '#ff9800';
-// //         return '#ff9800';
-// //     };
-
-// //     return (
-// //         <div style={{
-// //             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-// //             width: '450px', height: '580px', background: '#1a1a1a', borderRadius: '15px',
-// //             zIndex: 2000, display: 'flex', flexDirection: 'column', 
-// //             border: `2px solid ${getStatusColor()}`,
-// //             boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-// //         }}>
-// //             {/* Header */}
-// //             <div style={{ background: getStatusColor(), padding: '15px', borderRadius: '13px 13px 0 0', textAlign: 'center' }}>
-// //                 <div style={{ fontWeight: 'bold', fontSize: '18px', color: 'white' }}>{targetName}</div>
-// //                 <div style={{ fontSize: '12px', color: 'white', opacity: 0.8 }}>{getStatusText()}</div>
-// //             </div>
-            
-// //             {/* Audio Element */}
-// //             <audio ref={audioRef} autoPlay style={{ display: 'none' }} />
-            
-// //             {/* Call Status Image */}
-// //             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', background: '#2d2d2d' }}>
-// //                 <div style={{
-// //                     width: '120px', height: '120px', borderRadius: '50%', background: '#075E54',
-// //                     display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'
-// //                 }}>
-// //                     <FaMicrophone size={50} color="white" />
-// //                 </div>
-// //                 <div style={{ color: 'white', textAlign: 'center' }}>
-// //                     {callStatus === 'connected' && <div>🎤 Voice call connected</div>}
-// //                     {callStatus === 'calling' && <div>📞 Calling {targetName}...</div>}
-// //                     {callStatus === 'ringing' && <div>🔔 Incoming voice call...</div>}
-// //                     {callStatus === 'connecting' && <div>🔄 Connecting...</div>}
-// //                 </div>
-// //             </div>
-            
-// //             {/* Call Controls */}
-// //             <div style={{ padding: '20px', display: 'flex', justifyContent: 'center', gap: '20px', background: '#1a1a1a' }}>
-// //                 {inCall && (
-// //                     <button onClick={toggleMute} style={{
-// //                         background: isMuted ? '#f44336' : '#555',
-// //                         color: 'white', padding: '12px', border: 'none', borderRadius: '50%',
-// //                         cursor: 'pointer', width: '50px', height: '50px'
-// //                     }}>
-// //                         {isMuted ? <FaMicrophoneSlash size={20} /> : <FaMicrophone size={20} />}
-// //                     </button>
-// //                 )}
-// //                 <button onClick={endCall} style={{
-// //                     background: '#f44336', color: 'white', padding: '12px 24px', border: 'none',
-// //                     borderRadius: '30px', cursor: 'pointer', fontSize: '16px',
-// //                     display: 'flex', alignItems: 'center', gap: '8px'
-// //                 }}>
-// //                     <FaPhoneSlash /> End Call
-// //                 </button>
-// //             </div>
-            
-// //             {/* Chat Area */}
-// //             <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', background: '#2d2d2d', borderTop: '1px solid #444' }}>
-// //                 <div style={{ height: '180px', overflow: 'auto', marginBottom: '10px', padding: '10px' }}>
-// //                     {messages.length === 0 && (
-// //                         <div style={{ textAlign: 'center', color: '#888', marginTop: '30px' }}>
-// //                             💬 No messages yet
-// //                         </div>
-// //                     )}
-// //                     {messages.map((msg, i) => (
-// //                         <div key={i} style={{ textAlign: msg.from === currentUserId ? 'right' : 'left', marginBottom: '10px' }}>
-// //                             <div style={{
-// //                                 display: 'inline-block',
-// //                                 maxWidth: '80%',
-// //                                 background: msg.from === currentUserId ? '#ff9800' : '#555',
-// //                                 padding: '8px 12px',
-// //                                 borderRadius: '15px',
-// //                                 color: 'white',
-// //                                 wordWrap: 'break-word'
-// //                             }}>
-// //                                 {msg.message}
-// //                             </div>
-// //                             <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>
-// //                                 {new Date(msg.createdAt || msg.time).toLocaleTimeString()}
-// //                             </div>
-// //                         </div>
-// //                     ))}
-// //                     <div ref={messagesEndRef} />
-// //                 </div>
-                
-// //                 {/* Input Area */}
-// //                 <div style={{ display: 'flex', gap: '10px', padding: '10px', background: '#1a1a1a', borderRadius: '10px' }}>
-// //                     <input
-// //                         type="text"
-// //                         value={newMessage}
-// //                         onChange={e => setNewMessage(e.target.value)}
-// //                         onKeyPress={e => e.key === 'Enter' && sendMessage()}
-// //                         style={{ flex: 1, padding: '10px', borderRadius: '25px', border: 'none', outline: 'none', fontSize: '14px', background: '#fff', color: '#000' }}
-// //                         placeholder="Type a message..."
-// //                     />
-// //                     <button onClick={sendMessage} style={{ background: '#ff9800', border: 'none', padding: '8px 15px', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold', color: '#fff' }}>
-// //                         Send
-// //                     </button>
-// //                     {!inCall && callStatus !== 'ringing' && callStatus !== 'calling' && (
-// //                         <button onClick={startCall} style={{ background: '#4CAF50', border: 'none', padding: '8px 15px', borderRadius: '25px', cursor: 'pointer', color: 'white', fontWeight: 'bold' }}>
-// //                             📞 Call
-// //                         </button>
-// //                     )}
-// //                 </div>
-// //             </div>
-// //         </div>
-// //     );
-// // };
-
-// // export default VideoCallChat;
-
-// import React, { useState, useEffect, useRef } from 'react';
-// import io from 'socket.io-client';
-// import { FaPhoneSlash, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
-
-// const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isInitiator = false }) => {
-//     const [socket, setSocket] = useState(null);
-//     const [messages, setMessages] = useState([]);
-//     const [newMessage, setNewMessage] = useState('');
-//     const [inCall, setInCall] = useState(false);
-//     const [callStatus, setCallStatus] = useState('idle');
-//     const [localStream, setLocalStream] = useState(null);
-//     const [isMuted, setIsMuted] = useState(false);
-    
-//     const messagesEndRef = useRef(null);
-//     const peerConnection = useRef(null);
-//     const audioRef = useRef();
-
-//    // Replace the configuration with this:
-// const configuration = {
-//     iceServers: [
-//         { urls: 'stun:stun.l.google.com:19302' },
-//         { urls: 'stun:stun1.l.google.com:19302' },
-//         { urls: 'stun:stun2.l.google.com:19302' },
-//         // Add public TURN servers for better connection
-//         {
-//             urls: 'turn:openrelay.metered.ca:80',
-//             username: 'openrelayproject',
-//             credential: 'openrelayproject'
-//         },
-//         {
-//             urls: 'turn:openrelay.metered.ca:443',
-//             username: 'openrelayproject',
-//             credential: 'openrelayproject'
-//         }
-//     ]
-// };
-//     const loadMessages = async () => {
-//         try {
-//             const res = await fetch(`https://astrologer-backendcoll-chaat.onrender.com/api/chat/messages/${currentUserId}/${targetUserId}`);
-//             const data = await res.json();
-//             if (data.success && data.data) {
-//                 const sorted = data.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-//                 setMessages(sorted);
-//             }
-//         } catch (err) {
-//             console.error('Error loading messages:', err);
-//         }
-//     };
-
-//     const getAudio = async () => {
-//         try {
-//             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-//             setLocalStream(stream);
-//             console.log('✅ Microphone Working');
-//             return stream;
-//         } catch (err) {
-//             console.error('Microphone error:', err);
-//             alert('Please allow microphone access');
-//             return null;
-//         }
-//     };
-
-//     const startCall = async () => {
-//         console.log('📞 Starting voice call to', targetName);
-//         setCallStatus('calling');
-        
-//         const stream = await getAudio();
-//         if (!stream) {
-//             console.error('❌ No microphone access');
-//             setCallStatus('idle');
-//             return;
-//         }
-        
-//         setLocalStream(stream);
-        
-//         peerConnection.current = new RTCPeerConnection(configuration);
-        
-//         stream.getTracks().forEach(track => {
-//             peerConnection.current.addTrack(track, stream);
-//         });
-        
-//         peerConnection.current.ontrack = (event) => {
-//             console.log('🎤 Remote audio received!');
-//             if (audioRef.current) {
-//                 audioRef.current.srcObject = event.streams[0];
-//                 audioRef.current.play().catch(e => console.log('Audio play error:', e));
-//             }
-//             setInCall(true);
-//             setCallStatus('connected');
-//         };
-        
-//         peerConnection.current.oniceconnectionstatechange = () => {
-//             console.log('ICE State:', peerConnection.current.iceConnectionState);
-//             if (peerConnection.current.iceConnectionState === 'connected') {
-//                 console.log('✅ Voice call connected!');
-//             } else if (peerConnection.current.iceConnectionState === 'failed') {
-//                 console.log('❌ Voice call failed');
-//                 alert('Connection failed. Please try again.');
-//                 endCall();
-//             }
-//         };
-        
-//         const offer = await peerConnection.current.createOffer();
-//         await peerConnection.current.setLocalDescription(offer);
-        
-//         if (socket && socket.connected) {
-//             socket.emit('call-user', {
-//                 to: targetUserId,
-//                 from: currentUserId,
-//                 signal: {
-//                     type: offer.type,
-//                     sdp: offer.sdp
-//                 }
-//             });
-//         }
-        
-//         setCallStatus('ringing');
-        
-//         setTimeout(() => {
-//             if (callStatus === 'ringing') {
-//                 setCallStatus('idle');
-//                 alert('No answer from ' + targetName);
-//                 endCall();
-//             }
-//         }, 30000);
-//     };
-
-//     const acceptCall = async (signal) => {
-//         console.log('📞 Accepting voice call from', targetName);
-//         setCallStatus('connecting');
-        
-//         const stream = await getAudio();
-//         if (!stream) {
-//             console.error('❌ No microphone access');
-//             setCallStatus('idle');
-//             return;
-//         }
-        
-//         setLocalStream(stream);
-        
-//         peerConnection.current = new RTCPeerConnection(configuration);
-        
-//         stream.getTracks().forEach(track => {
-//             peerConnection.current.addTrack(track, stream);
-//         });
-        
-//         peerConnection.current.ontrack = (event) => {
-//             console.log('🎤 Remote audio received!');
-//             if (audioRef.current) {
-//                 audioRef.current.srcObject = event.streams[0];
-//                 audioRef.current.play().catch(e => console.log('Audio play error:', e));
-//             }
-//             setInCall(true);
-//             setCallStatus('connected');
-//         };
-        
-//         peerConnection.current.oniceconnectionstatechange = () => {
-//             console.log('ICE State:', peerConnection.current.iceConnectionState);
-//             if (peerConnection.current.iceConnectionState === 'connected') {
-//                 console.log('✅ Voice call connected!');
-//             } else if (peerConnection.current.iceConnectionState === 'failed') {
-//                 console.log('❌ Voice call failed');
-//                 endCall();
-//             }
-//         };
-        
-//         try {
-//             let remoteSignal = signal;
-//             if (typeof signal === 'string') {
-//                 remoteSignal = JSON.parse(signal);
-//             }
-            
-//             const remoteDesc = new RTCSessionDescription({
-//                 type: remoteSignal.type || 'offer',
-//                 sdp: remoteSignal.sdp || remoteSignal
-//             });
-            
-//             await peerConnection.current.setRemoteDescription(remoteDesc);
-//             const answer = await peerConnection.current.createAnswer();
-//             await peerConnection.current.setLocalDescription(answer);
-            
-//             if (socket) {
-//                 socket.emit('answer-call', { 
-//                     to: targetUserId, 
-//                     signal: {
-//                         type: answer.type,
-//                         sdp: answer.sdp
-//                     }
-//                 });
-//             }
-//             setCallStatus('connected');
-//             setInCall(true);
-//         } catch (err) {
-//             console.error('Error accepting call:', err);
-//             setCallStatus('idle');
-//         }
-//     };
-
-//     const endCall = () => {
-//         console.log('🔴 Ending voice call');
-//         if (peerConnection.current) {
-//             peerConnection.current.close();
-//             peerConnection.current = null;
-//         }
-//         if (localStream) {
-//             localStream.getTracks().forEach(track => track.stop());
-//             setLocalStream(null);
-//         }
-//         if (socket) {
-//             socket.emit('end-call', { to: targetUserId });
-//         }
-//         setInCall(false);
-//         setCallStatus('idle');
-//         onClose();
-//     };
-
-//     const toggleMute = () => {
-//         if (localStream) {
-//             const audioTrack = localStream.getAudioTracks()[0];
-//             if (audioTrack) {
-//                 audioTrack.enabled = !audioTrack.enabled;
-//                 setIsMuted(!audioTrack.enabled);
-//                 console.log(isMuted ? '🔊 Unmuted' : '🔇 Muted');
-//             }
-//         }
-//     };
-
-//     const sendMessage = () => {
-//         if (!newMessage.trim()) return;
-//         if (!socket || !socket.connected) {
-//             alert('Not connected to server');
-//             return;
-//         }
-        
-//         socket.emit('private-message', {
-//             to: targetUserId,
-//             from: currentUserId,
-//             message: newMessage
-//         });
-        
-//         setMessages(prev => [...prev, {
-//             from: currentUserId,
-//             message: newMessage,
-//             time: new Date(),
-//             createdAt: new Date()
-//         }]);
-//         setNewMessage('');
-        
-//         setTimeout(() => {
-//             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-//         }, 100);
-//     };
-
-//     useEffect(() => {
-//         const s = io('https://astrologer-backendcoll-chaat.onrender.com');
-//         setSocket(s);
-        
-//         s.on('connect', () => {
-//             console.log('✅ Socket connected:', s.id);
-//             s.emit('user-join', currentUserId);
-//         });
-
-//         s.on('incoming-call', async (data) => {
-//             console.log('📞 INCOMING VOICE CALL:', data);
-//             if (data.from === targetUserId && !isInitiator) {
-//                 setCallStatus('ringing');
-//                 const accept = window.confirm(`📞 Incoming voice call from ${targetName}. Accept?`);
-//                 if (accept) {
-//                     await acceptCall(data.signal);
-//                 } else {
-//                     s.emit('end-call', { to: data.from });
-//                     onClose();
-//                 }
-//             }
-//         });
-
-//         s.on('call-answered', async (data) => {
-//             console.log('✅ Call answered by', targetName);
-//             console.log('📞 Signal received:', data);
-            
-//             if (peerConnection.current && data.signal) {
-//                 try {
-//                     let answerSignal = data.signal;
-//                     if (typeof answerSignal === 'string') {
-//                         answerSignal = JSON.parse(answerSignal);
-//                     }
-//                     const answerDesc = new RTCSessionDescription({
-//                         type: answerSignal.type || 'answer',
-//                         sdp: answerSignal.sdp || answerSignal
-//                     });
-//                     await peerConnection.current.setRemoteDescription(answerDesc);
-//                     setCallStatus('connected');
-//                     setInCall(true);
-//                     console.log('✅ Voice call connected!');
-//                 } catch (err) {
-//                     console.error('Error setting answer:', err);
-//                 }
-//             }
-//         });
-
-//         s.on('call-ended', () => {
-//             console.log('🔴 Call ended');
-//             endCall();
-//         });
-
-//         s.on('private-message', (data) => {
-//             if (data.from === targetUserId || data.to === targetUserId) {
-//                 setMessages(prev => [...prev, data]);
-//                 setTimeout(() => {
-//                     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-//                 }, 100);
-//             }
-//         });
-
-//         loadMessages();
-
-//         if (isInitiator) {
-//             setTimeout(() => startCall(), 1000);
-//         }
-
-//         return () => {
-//             if (socket) socket.close();
-//             if (localStream) {
-//                 localStream.getTracks().forEach(track => track.stop());
-//             }
-//             if (peerConnection.current) {
-//                 peerConnection.current.close();
-//             }
-//         };
-//     }, []);
-
-//     useEffect(() => {
-//         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-//     }, [messages]);
-
-//     const getStatusText = () => {
-//         switch(callStatus) {
-//             case 'calling': return '📞 Calling...';
-//             case 'ringing': return '🔔 Ringing...';
-//             case 'connected': return '🎤 Voice Call Connected';
-//             case 'connecting': return '🔄 Connecting...';
-//             default: return '💬 Chat';
-//         }
-//     };
-
-//     const getStatusColor = () => {
-//         if (callStatus === 'connected') return '#4CAF50';
-//         if (callStatus === 'calling') return '#ff9800';
-//         if (callStatus === 'ringing') return '#ff9800';
-//         return '#ff9800';
-//     };
-
-//     return (
-//         <div style={{
-//             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-//             width: '450px', height: '580px', background: '#1a1a1a', borderRadius: '15px',
-//             zIndex: 2000, display: 'flex', flexDirection: 'column', 
-//             border: `2px solid ${getStatusColor()}`,
-//             boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-//         }}>
-//             {/* Header */}
-//             <div style={{ background: getStatusColor(), padding: '15px', borderRadius: '13px 13px 0 0', textAlign: 'center' }}>
-//                 <div style={{ fontWeight: 'bold', fontSize: '18px', color: 'white' }}>{targetName}</div>
-//                 <div style={{ fontSize: '12px', color: 'white', opacity: 0.8 }}>{getStatusText()}</div>
-//             </div>
-            
-//             {/* Audio Element */}
-//             <audio ref={audioRef} autoPlay style={{ display: 'none' }} />
-            
-//             {/* Call Status Image */}
-//             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', background: '#2d2d2d' }}>
-//                 <div style={{
-//                     width: '120px', height: '120px', borderRadius: '50%', background: '#075E54',
-//                     display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'
-//                 }}>
-//                     <FaMicrophone size={50} color="white" />
-//                 </div>
-//                 <div style={{ color: 'white', textAlign: 'center' }}>
-//                     {callStatus === 'connected' && <div>🎤 Voice call connected</div>}
-//                     {callStatus === 'calling' && <div>📞 Calling {targetName}...</div>}
-//                     {callStatus === 'ringing' && <div>🔔 Incoming voice call...</div>}
-//                     {callStatus === 'connecting' && <div>🔄 Connecting...</div>}
-//                 </div>
-//             </div>
-            
-//             {/* Call Controls */}
-//             <div style={{ padding: '20px', display: 'flex', justifyContent: 'center', gap: '20px', background: '#1a1a1a' }}>
-//                 {inCall && (
-//                     <button onClick={toggleMute} style={{
-//                         background: isMuted ? '#f44336' : '#555',
-//                         color: 'white', padding: '12px', border: 'none', borderRadius: '50%',
-//                         cursor: 'pointer', width: '50px', height: '50px'
-//                     }}>
-//                         {isMuted ? <FaMicrophoneSlash size={20} /> : <FaMicrophone size={20} />}
-//                     </button>
-//                 )}
-//                 <button onClick={endCall} style={{
-//                     background: '#f44336', color: 'white', padding: '12px 24px', border: 'none',
-//                     borderRadius: '30px', cursor: 'pointer', fontSize: '16px',
-//                     display: 'flex', alignItems: 'center', gap: '8px'
-//                 }}>
-//                     <FaPhoneSlash /> End Call
-//                 </button>
-//             </div>
-            
-//             {/* Chat Area */}
-//             <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', background: '#2d2d2d', borderTop: '1px solid #444' }}>
-//                 <div style={{ height: '180px', overflow: 'auto', marginBottom: '10px', padding: '10px' }}>
-//                     {messages.length === 0 && (
-//                         <div style={{ textAlign: 'center', color: '#888', marginTop: '30px' }}>
-//                             💬 No messages yet
-//                         </div>
-//                     )}
-//                     {messages.map((msg, i) => (
-//                         <div key={i} style={{ textAlign: msg.from === currentUserId ? 'right' : 'left', marginBottom: '10px' }}>
-//                             <div style={{
-//                                 display: 'inline-block',
-//                                 maxWidth: '80%',
-//                                 background: msg.from === currentUserId ? '#ff9800' : '#555',
-//                                 padding: '8px 12px',
-//                                 borderRadius: '15px',
-//                                 color: 'white',
-//                                 wordWrap: 'break-word'
-//                             }}>
-//                                 {msg.message}
-//                             </div>
-//                             <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>
-//                                 {new Date(msg.createdAt || msg.time).toLocaleTimeString()}
-//                             </div>
-//                         </div>
-//                     ))}
-//                     <div ref={messagesEndRef} />
-//                 </div>
-                
-//                 {/* Input Area */}
-//                 <div style={{ display: 'flex', gap: '10px', padding: '10px', background: '#1a1a1a', borderRadius: '10px' }}>
-//                     <input
-//                         type="text"
-//                         value={newMessage}
-//                         onChange={e => setNewMessage(e.target.value)}
-//                         onKeyPress={e => e.key === 'Enter' && sendMessage()}
-//                         style={{ flex: 1, padding: '10px', borderRadius: '25px', border: 'none', outline: 'none', fontSize: '14px', background: '#fff', color: '#000' }}
-//                         placeholder="Type a message..."
-//                     />
-//                     <button onClick={sendMessage} style={{ background: '#ff9800', border: 'none', padding: '8px 15px', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold', color: '#fff' }}>
-//                         Send
-//                     </button>
-//                     {!inCall && callStatus !== 'ringing' && callStatus !== 'calling' && (
-//                         <button onClick={startCall} style={{ background: '#4CAF50', border: 'none', padding: '8px 15px', borderRadius: '25px', cursor: 'pointer', color: 'white', fontWeight: 'bold' }}>
-//                             📞 Call
-//                         </button>
-//                     )}
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default VideoCallChat;
-
 import React, { useState, useEffect, useRef } from 'react';
-import io from 'socket.io-client';
-import { FaPhoneSlash, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
+import { supabase } from '../supabaseClient';
 
-const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isInitiator = false }) => {
-    const [socket, setSocket] = useState(null);
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
-    const [inCall, setInCall] = useState(false);
+const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isInitiator = false, incomingOffer = null }) => {
     const [callStatus, setCallStatus] = useState('idle');
     const [localStream, setLocalStream] = useState(null);
     const [isMuted, setIsMuted] = useState(false);
-    const [incomingCallData, setIncomingCallData] = useState(null);
+    const [error, setError] = useState(null);
     
-    const messagesEndRef = useRef(null);
     const peerConnection = useRef(null);
-    const audioRef = useRef();
+    const remoteAudioRef = useRef();
+    const localAudioRef = useRef();
 
     const configuration = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' },
-            {
-                urls: 'turn:openrelay.metered.ca:80',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
-            },
-            {
-                urls: 'turn:openrelay.metered.ca:443',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
-            }
+            { urls: 'stun:stun2.l.google.com:19302' }
         ]
     };
 
-    const loadMessages = async () => {
-        try {
-            const res = await fetch(`https://astrologer-backendcoll-chaat.onrender.com/api/chat/messages/${currentUserId}/${targetUserId}`);
-            const data = await res.json();
-            if (data.success && data.data) {
-                const sorted = data.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                setMessages(sorted);
-            }
-        } catch (err) {
-            console.error('Error loading messages:', err);
-        }
-    };
-
-    const getAudio = async () => {
+    // Get microphone
+    const getMicrophone = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             setLocalStream(stream);
-            console.log('✅ Microphone Working');
+            if (localAudioRef.current) {
+                localAudioRef.current.srcObject = stream;
+            }
             return stream;
         } catch (err) {
             console.error('Microphone error:', err);
-            alert('Please allow microphone access');
+            setError('Microphone access denied');
             return null;
         }
     };
 
-    // ✅ FIXED: Start Call Function
-    const startCall = async () => {
-        console.log('📞 Starting voice call to', targetName);
-        setCallStatus('calling');
-        
-        const stream = await getAudio();
-        if (!stream) {
-            console.error('❌ No microphone access');
-            setCallStatus('idle');
-            return;
+    // Send ICE candidate to database
+    const sendIceCandidate = async (candidate) => {
+        try {
+            await supabase.from('unified_interactions').insert({
+                sender_id: currentUserId,
+                receiver_id: targetUserId,
+                action_type: 'ice_candidate',
+                payload: { candidate: candidate }
+            });
+        } catch (err) {
+            console.error('Send ICE error:', err);
+        }
+    };
+
+    // Send answer to database
+    const sendAnswer = async (answer) => {
+        try {
+            await supabase.from('unified_interactions').insert({
+                sender_id: currentUserId,
+                receiver_id: targetUserId,
+                action_type: 'call_answer',
+                payload: { answer: answer }
+            });
+        } catch (err) {
+            console.error('Send answer error:', err);
+        }
+    };
+
+    // Send offer to database
+    const sendOffer = async (offer) => {
+        try {
+            await supabase.from('unified_interactions').insert({
+                sender_id: currentUserId,
+                receiver_id: targetUserId,
+                action_type: 'call_offer',
+                payload: { offer: offer }
+            });
+        } catch (err) {
+            console.error('Send offer error:', err);
+        }
+    };
+
+    // Initialize peer connection
+    const initPeerConnection = (stream) => {
+        if (peerConnection.current) {
+            peerConnection.current.close();
         }
         
-        setLocalStream(stream);
+        const pc = new RTCPeerConnection(configuration);
+        peerConnection.current = pc;
         
-        peerConnection.current = new RTCPeerConnection(configuration);
-        
+        // Add local tracks
         stream.getTracks().forEach(track => {
-            peerConnection.current.addTrack(track, stream);
+            pc.addTrack(track, stream);
         });
         
-        peerConnection.current.ontrack = (event) => {
-            console.log('🎤 Remote audio received!');
-            if (audioRef.current) {
-                audioRef.current.srcObject = event.streams[0];
-                audioRef.current.play().catch(e => console.log('Audio play error:', e));
+        // Handle remote stream
+        pc.ontrack = (event) => {
+            console.log('📞 Received remote audio');
+            if (remoteAudioRef.current) {
+                remoteAudioRef.current.srcObject = event.streams[0];
+                remoteAudioRef.current.play().catch(e => console.log(e));
             }
-            setInCall(true);
-            setCallStatus('connected');
         };
         
-        peerConnection.current.oniceconnectionstatechange = () => {
-            console.log('ICE State:', peerConnection.current.iceConnectionState);
-            if (peerConnection.current.iceConnectionState === 'connected') {
-                console.log('✅ Voice call connected!');
-            } else if (peerConnection.current.iceConnectionState === 'failed') {
-                console.log('❌ Voice call failed');
-                alert('Connection failed. Please try again.');
+        // Handle ICE candidates
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                console.log('📡 Sending ICE candidate');
+                sendIceCandidate(event.candidate);
+            }
+        };
+        
+        // Handle connection state
+        pc.onconnectionstatechange = () => {
+            console.log('🔌 Connection state:', pc.connectionState);
+            if (pc.connectionState === 'connected') {
+                console.log('✅ Call connected!');
+                setCallStatus('connected');
+            } else if (pc.connectionState === 'failed') {
+                setError('Connection failed');
                 endCall();
             }
         };
         
-        const offer = await peerConnection.current.createOffer();
-        await peerConnection.current.setLocalDescription(offer);
-        
-        // ✅ EMIT to backend
-        if (socket && socket.connected) {
-            console.log('📤 Emitting call-user to:', targetUserId);
-            socket.emit('call-user', {
-                to: targetUserId,
-                from: currentUserId,
-                signal: {
-                    type: offer.type,
-                    sdp: offer.sdp
-                }
-            });
-        } else {
-            console.error('❌ Socket not connected!');
-        }
-        
-        setCallStatus('ringing');
-        
-        // Timeout after 30 seconds
-        setTimeout(() => {
-            if (callStatus === 'ringing') {
-                setCallStatus('idle');
-                alert('No answer from ' + targetName);
-                if (!inCall) endCall();
-            }
-        }, 30000);
+        return pc;
     };
 
-    // ✅ FIXED: Accept Call Function
-    const acceptCall = async () => {
-        console.log('📞 Accepting voice call from', targetName);
-        setCallStatus('connecting');
+    // Start call as initiator
+    const startCall = async () => {
+        console.log('📞 Starting call...');
+        setCallStatus('calling');
         
-        const stream = await getAudio();
+        const stream = await getMicrophone();
         if (!stream) {
-            console.error('❌ No microphone access');
             setCallStatus('idle');
             return;
         }
         
-        setLocalStream(stream);
-        
-        peerConnection.current = new RTCPeerConnection(configuration);
-        
-        stream.getTracks().forEach(track => {
-            peerConnection.current.addTrack(track, stream);
-        });
-        
-        peerConnection.current.ontrack = (event) => {
-            console.log('🎤 Remote audio received!');
-            if (audioRef.current) {
-                audioRef.current.srcObject = event.streams[0];
-                audioRef.current.play().catch(e => console.log('Audio play error:', e));
-            }
-            setInCall(true);
-            setCallStatus('connected');
-        };
-        
-        peerConnection.current.oniceconnectionstatechange = () => {
-            console.log('ICE State:', peerConnection.current.iceConnectionState);
-            if (peerConnection.current.iceConnectionState === 'connected') {
-                console.log('✅ Voice call connected!');
-            }
-        };
+        const pc = initPeerConnection(stream);
         
         try {
-            if (incomingCallData && incomingCallData.signal) {
-                let remoteSignal = incomingCallData.signal;
-                if (typeof remoteSignal === 'string') {
-                    remoteSignal = JSON.parse(remoteSignal);
-                }
-                
-                const remoteDesc = new RTCSessionDescription({
-                    type: remoteSignal.type || 'offer',
-                    sdp: remoteSignal.sdp || remoteSignal
-                });
-                
-                await peerConnection.current.setRemoteDescription(remoteDesc);
-                const answer = await peerConnection.current.createAnswer();
-                await peerConnection.current.setLocalDescription(answer);
-                
-                if (socket && socket.connected) {
-                    console.log('📤 Emitting call-answered to:', targetUserId);
-                    socket.emit('call-answered', {
-                        to: targetUserId,
-                        signal: {
-                            type: answer.type,
-                            sdp: answer.sdp
-                        }
-                    });
-                }
-                
-                // Also emit answer-call for backward compatibility
-                if (socket && socket.connected) {
-                    socket.emit('answer-call', {
-                        to: targetUserId,
-                        signal: {
-                            type: answer.type,
-                            sdp: answer.sdp
-                        }
-                    });
-                }
-                
-                setCallStatus('connected');
-                setInCall(true);
-                setIncomingCallData(null);
-            }
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            console.log('📤 Sending offer');
+            await sendOffer(offer);
+            setCallStatus('ringing');
         } catch (err) {
-            console.error('Error accepting call:', err);
-            setCallStatus('idle');
+            console.error('Offer error:', err);
+            setError('Failed to start call');
+            endCall();
         }
     };
-
+    
+    // Accept call with incoming offer
+    const acceptCall = async (offer) => {
+        console.log('📞 Accepting call...');
+        setCallStatus('connecting');
+        
+        const stream = await getMicrophone();
+        if (!stream) {
+            setCallStatus('idle');
+            return;
+        }
+        
+        const pc = initPeerConnection(stream);
+        
+        try {
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            console.log('📤 Sending answer');
+            await sendAnswer(answer);
+        } catch (err) {
+            console.error('Answer error:', err);
+            setError('Failed to accept call');
+            endCall();
+        }
+    };
+    
+    // End call
     const endCall = () => {
-        console.log('🔴 Ending voice call');
+        console.log('📞 Ending call');
         if (peerConnection.current) {
             peerConnection.current.close();
             peerConnection.current = null;
@@ -1578,319 +186,106 @@ const VideoCallChat = ({ currentUserId, targetUserId, targetName, onClose, isIni
             localStream.getTracks().forEach(track => track.stop());
             setLocalStream(null);
         }
-        if (socket && socket.connected) {
-            socket.emit('end-call', { to: targetUserId });
-        }
-        setInCall(false);
         setCallStatus('idle');
         onClose();
     };
-
+    
+    // Toggle mute
     const toggleMute = () => {
         if (localStream) {
-            const audioTrack = localStream.getAudioTracks()[0];
-            if (audioTrack) {
-                audioTrack.enabled = !audioTrack.enabled;
-                setIsMuted(!audioTrack.enabled);
-                console.log(isMuted ? '🔊 Unmuted' : '🔇 Muted');
-            }
+            const track = localStream.getAudioTracks()[0];
+            track.enabled = !track.enabled;
+            setIsMuted(!track.enabled);
         }
     };
-
-    const sendMessage = () => {
-        if (!newMessage.trim()) return;
-        if (!socket || !socket.connected) {
-            alert('Not connected to server');
-            return;
-        }
-        
-        socket.emit('private-message', {
-            to: targetUserId,
-            from: currentUserId,
-            message: newMessage
-        });
-        
-        setMessages(prev => [...prev, {
-            from: currentUserId,
-            message: newMessage,
-            time: new Date(),
-            createdAt: new Date()
-        }]);
-        setNewMessage('');
-        
-        setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
-
-   useEffect(() => {
-    console.log('🔵 VideoCallChat mounted:', { currentUserId, targetUserId, isInitiator });
     
-    const s = io('https://astrologer-backendcoll-chaat.onrender.com', {
-        transports: ['websocket', 'polling']
-    });
-    setSocket(s);
-    
-    s.on('connect', () => {
-        console.log('✅ Socket connected:', s.id);
-        console.log('📢 Emitting user-join:', currentUserId);
-        s.emit('user-join', String(currentUserId));
-    });
-    
-    s.on('connect_error', (err) => {
-        console.error('❌ Socket connection error:', err);
-    });
-    
-    // ✅ FIXED: incoming-call handler
-    s.on('incoming-call', (data) => {
-        console.log('🔔🔔🔔 INCOMING CALL RECEIVED in VideoCallChat!', data);
-        console.log('📞 From:', data.from, 'Target should be:', targetUserId);
-        
-        if (data.from === targetUserId || String(data.from) === String(targetUserId)) {
-            console.log('✅ Match! Displaying incoming call UI');
-            setIncomingCallData(data);
-            setCallStatus('ringing');
-        } else {
-            console.log('❌ No match. data.from:', data.from, 'targetUserId:', targetUserId);
-        }
-    });
-    
-    // ✅ Handle call-answered (for initiator)
-    s.on('call-answered', async (data) => {
-        console.log('✅ call-answered received!', data);
-        
-        if (peerConnection.current && data.signal) {
-            try {
-                let answerSignal = data.signal;
-                if (typeof answerSignal === 'string') {
-                    answerSignal = JSON.parse(answerSignal);
-                }
-                const answerDesc = new RTCSessionDescription({
-                    type: answerSignal.type || 'answer',
-                    sdp: answerSignal.sdp || answerSignal
-                });
-                await peerConnection.current.setRemoteDescription(answerDesc);
-                setCallStatus('connected');
-                setInCall(true);
-                console.log('✅ Voice call connected successfully!');
-            } catch (err) {
-                console.error('Error setting answer:', err);
-            }
-        }
-    });
-    
-    s.on('answer-call', async (data) => {
-        console.log('✅ answer-call received!', data);
-        
-        if (peerConnection.current && data.signal) {
-            try {
-                let answerSignal = data.signal;
-                if (typeof answerSignal === 'string') {
-                    answerSignal = JSON.parse(answerSignal);
-                }
-                const answerDesc = new RTCSessionDescription({
-                    type: answerSignal.type || 'answer',
-                    sdp: answerSignal.sdp || answerSignal
-                });
-                await peerConnection.current.setRemoteDescription(answerDesc);
-                setCallStatus('connected');
-                setInCall(true);
-                console.log('✅ Voice call connected via answer-call!');
-            } catch (err) {
-                console.error('Error setting answer:', err);
-            }
-        }
-    });
-    
-    s.on('call-ended', () => {
-        console.log('🔴 Call ended by other party');
-        endCall();
-    });
-    
-    s.on('private-message', (data) => {
-        console.log('💬 Message received:', data);
-        if (data.from === targetUserId || data.to === targetUserId) {
-            setMessages(prev => [...prev, data]);
-            setTimeout(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-        }
-    });
-    
-    loadMessages();
-    
-    // ✅✅✅ FIXED: Auto-start call ONLY after socket is connected ✅✅✅
-    if (isInitiator) {
-        const checkConnection = setInterval(() => {
-            if (s.connected) {
-                clearInterval(checkConnection);
-                console.log('✅ Socket connected, starting call now...');
-                startCall();
-            } else {
-                console.log('⏳ Waiting for socket connection...');
-            }
-        }, 500);
-        
-        // Cleanup interval on unmount
-        return () => {
-            clearInterval(checkConnection);
-            console.log('🔴 VideoCallChat unmounting');
-            if (s) s.close();
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            if (peerConnection.current) {
-                peerConnection.current.close();
-            }
-        };
-    }
-    
-    return () => {
-        console.log('🔴 VideoCallChat unmounting');
-        if (s) s.close();
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-        }
-        if (peerConnection.current) {
-            peerConnection.current.close();
-        }
-    };
-}, []);
-
+    // Listen for incoming signals
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
-
-    const getStatusText = () => {
-        switch(callStatus) {
-            case 'calling': return '📞 Calling...';
-            case 'ringing': return '🔔 Incoming voice call...';
-            case 'connected': return '🎤 Voice Call Connected';
-            case 'connecting': return '🔄 Connecting...';
-            default: return '💬 Chat';
+        // If we have an incoming offer from props, accept it
+        if (incomingOffer && !isInitiator && callStatus === 'idle') {
+            acceptCall(incomingOffer);
         }
-    };
-
-    const getStatusColor = () => {
-        if (callStatus === 'connected') return '#4CAF50';
-        if (callStatus === 'calling') return '#ff9800';
-        if (callStatus === 'ringing') return '#ff9800';
-        return '#ff9800';
-    };
-
+        
+        // Subscribe to database signals
+        const subscription = supabase
+            .channel('call_signals')
+            .on('postgres_changes', 
+                { event: 'INSERT', schema: 'public', table: 'unified_interactions', filter: `receiver_id=eq.${currentUserId}` },
+                async (payload) => {
+                    const data = payload.new;
+                    console.log('📨 Signal:', data.action_type);
+                    
+                    if (data.action_type === 'call_offer' && !isInitiator && callStatus === 'idle' && !incomingOffer) {
+                        acceptCall(data.payload.offer);
+                    }
+                    
+                    if (data.action_type === 'call_answer' && peerConnection.current && !peerConnection.current.currentRemoteDescription) {
+                        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.payload.answer));
+                        console.log('✅ Answer set');
+                    }
+                    
+                    if (data.action_type === 'ice_candidate' && data.payload?.candidate && peerConnection.current) {
+                        try {
+                            await peerConnection.current.addIceCandidate(new RTCIceCandidate(data.payload.candidate));
+                            console.log('✅ ICE candidate added');
+                        } catch (err) {
+                            console.error('ICE error:', err);
+                        }
+                    }
+                }
+            )
+            .subscribe();
+        
+        if (isInitiator && callStatus === 'idle') {
+            setTimeout(startCall, 500);
+        }
+        
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
+    
     return (
-        <div style={{
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-            width: '450px', height: '580px', background: '#1a1a1a', borderRadius: '15px',
-            zIndex: 2000, display: 'flex', flexDirection: 'column', 
-            border: `2px solid ${getStatusColor()}`,
-            boxShadow: '0 0 20px rgba(0,0,0,0.5)'
-        }}>
-            {/* Header */}
-            <div style={{ background: getStatusColor(), padding: '15px', borderRadius: '13px 13px 0 0', textAlign: 'center' }}>
-                <div style={{ fontWeight: 'bold', fontSize: '18px', color: 'white' }}>{targetName}</div>
-                <div style={{ fontSize: '12px', color: 'white', opacity: 0.8 }}>{getStatusText()}</div>
-            </div>
-            
-            {/* Audio Element */}
-            <audio ref={audioRef} autoPlay style={{ display: 'none' }} />
-            
-            {/* Call Status Display */}
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', background: '#2d2d2d' }}>
-                <div style={{
-                    width: '120px', height: '120px', borderRadius: '50%', background: '#075E54',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'
-                }}>
-                    <FaMicrophone size={50} color="white" />
-                </div>
-                <div style={{ color: 'white', textAlign: 'center' }}>
-                    {callStatus === 'connected' && <div>🎤 Voice call connected</div>}
-                    {callStatus === 'calling' && <div>📞 Calling {targetName}...</div>}
-                    {callStatus === 'ringing' && <div>🔔 Incoming voice call from {targetName}...</div>}
-                    {callStatus === 'connecting' && <div>🔄 Connecting...</div>}
+        <div className="fixed inset-0 bg-black/95 z-[1000] flex items-center justify-center">
+            <div className="w-96 bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+                <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 text-center">
+                    <div className="text-white font-bold text-lg">{targetName}</div>
+                    <div className="text-sm text-white/80">
+                        {callStatus === 'connected' && '🔴 In Call'}
+                        {callStatus === 'calling' && '📞 Calling...'}
+                        {callStatus === 'ringing' && '📱 Ringing...'}
+                        {callStatus === 'connecting' && '🔗 Connecting...'}
+                    </div>
+                    {error && <div className="text-red-300 text-xs mt-1">{error}</div>}
                 </div>
                 
-                {/* ✅ FIXED: Accept/Decline buttons for incoming call */}
-                {callStatus === 'ringing' && incomingCallData && (
-                    <div style={{ marginTop: '20px', display: 'flex', gap: '15px' }}>
-                        <button onClick={acceptCall} style={{
-                            background: '#4CAF50', color: 'white', padding: '10px 25px',
-                            border: 'none', borderRadius: '25px', cursor: 'pointer', fontSize: '16px'
-                        }}>
-                            ✅ Accept
-                        </button>
-                        <button onClick={endCall} style={{
-                            background: '#f44336', color: 'white', padding: '10px 25px',
-                            border: 'none', borderRadius: '25px', cursor: 'pointer', fontSize: '16px'
-                        }}>
-                            ❌ Decline
+                <audio ref={localAudioRef} muted autoPlay />
+                <audio ref={remoteAudioRef} autoPlay playsInline />
+                
+                <div className="p-8 flex flex-col items-center">
+                    <div className={`w-28 h-28 rounded-full flex items-center justify-center text-5xl mb-6 ${
+                        callStatus === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-gradient-to-r from-yellow-500 to-yellow-600 animate-pulse'
+                    }`}>
+                        {callStatus === 'connected' ? '🎤' : '📞'}
+                    </div>
+                    
+                    <div className="text-white text-center text-sm mb-6">
+                        {callStatus === 'connected' && '✅ Connected - You can talk now'}
+                        {callStatus === 'calling' && 'Calling...'}
+                        {callStatus === 'ringing' && 'Ringing...'}
+                        {callStatus === 'connecting' && 'Connecting...'}
+                    </div>
+                    
+                    <div className="flex gap-6">
+                        {callStatus === 'connected' && (
+                            <button onClick={toggleMute} className="w-14 h-14 bg-gray-700 rounded-full text-white text-2xl">
+                                {isMuted ? '🔇' : '🎤'}
+                            </button>
+                        )}
+                        <button onClick={endCall} className="w-14 h-14 bg-red-600 rounded-full text-white text-2xl">
+                            📞
                         </button>
                     </div>
-                )}
-            </div>
-            
-            {/* Call Controls */}
-            <div style={{ padding: '20px', display: 'flex', justifyContent: 'center', gap: '20px', background: '#1a1a1a' }}>
-                {inCall && (
-                    <button onClick={toggleMute} style={{
-                        background: isMuted ? '#f44336' : '#555',
-                        color: 'white', padding: '12px', border: 'none', borderRadius: '50%',
-                        cursor: 'pointer', width: '50px', height: '50px'
-                    }}>
-                        {isMuted ? <FaMicrophoneSlash size={20} /> : <FaMicrophone size={20} />}
-                    </button>
-                )}
-                <button onClick={endCall} style={{
-                    background: '#f44336', color: 'white', padding: '12px 24px', border: 'none',
-                    borderRadius: '30px', cursor: 'pointer', fontSize: '16px',
-                    display: 'flex', alignItems: 'center', gap: '8px'
-                }}>
-                    <FaPhoneSlash /> End Call
-                </button>
-            </div>
-            
-            {/* Chat Area */}
-            <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', background: '#2d2d2d', borderTop: '1px solid #444' }}>
-                <div style={{ height: '180px', overflow: 'auto', marginBottom: '10px', padding: '10px' }}>
-                    {messages.length === 0 && (
-                        <div style={{ textAlign: 'center', color: '#888', marginTop: '30px' }}>
-                            💬 No messages yet
-                        </div>
-                    )}
-                    {messages.map((msg, i) => (
-                        <div key={i} style={{ textAlign: msg.from === currentUserId ? 'right' : 'left', marginBottom: '10px' }}>
-                            <div style={{
-                                display: 'inline-block',
-                                maxWidth: '80%',
-                                background: msg.from === currentUserId ? '#ff9800' : '#555',
-                                padding: '8px 12px',
-                                borderRadius: '15px',
-                                color: 'white',
-                                wordWrap: 'break-word'
-                            }}>
-                                {msg.message}
-                            </div>
-                            <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>
-                                {new Date(msg.createdAt || msg.time).toLocaleTimeString()}
-                            </div>
-                        </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                </div>
-                
-                {/* Input Area */}
-                <div style={{ display: 'flex', gap: '10px', padding: '10px', background: '#1a1a1a', borderRadius: '10px' }}>
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={e => setNewMessage(e.target.value)}
-                        onKeyPress={e => e.key === 'Enter' && sendMessage()}
-                        style={{ flex: 1, padding: '10px', borderRadius: '25px', border: 'none', outline: 'none', fontSize: '14px', background: '#fff', color: '#000' }}
-                        placeholder="Type a message..."
-                    />
-                    <button onClick={sendMessage} style={{ background: '#ff9800', border: 'none', padding: '8px 15px', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold', color: '#fff' }}>
-                        Send
-                    </button>
                 </div>
             </div>
         </div>

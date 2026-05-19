@@ -1,983 +1,254 @@
-// // // // // // import React, { useState, useEffect } from 'react';
-// // // // // // import { useAuth } from '../../context/AuthContext';
-// // // // // // import ChatBox from '../Chat/ChatBox';
-// // // // // // import PanditInbox from '../PanditInbox';
-// // // // // // // import PanditInbox from '../Pandit/PanditInbox';
-
-// // // // // // const PanditSection = () => {
-// // // // // //     const [pandits, setPandits] = useState([]);
-// // // // // //     const [loading, setLoading] = useState(true);
-// // // // // //     const [selectedPandit, setSelectedPandit] = useState(null);
-// // // // // //     const [showChat, setShowChat] = useState(false);
-// // // // // //     const [showPanditInbox, setShowPanditInbox] = useState(false);
-// // // // // //     const { user } = useAuth();
-
-// // // // // //     const isPandit = user?.phone === '8888888888' || user?.mobile === '8888888888';
-
-// // // // // //     useEffect(() => {
-// // // // // //         const demoPandits = [
-// // // // // //             { _id: '8888888888', firstName: 'Acharya Sheetal', experience: 17, languages: 'Hindi, English', skills: 'Vedic Astrology', rating: 5 },
-// // // // // //             { _id: '7777777777', firstName: 'Pandit Suresh Mishra', experience: 10, languages: 'Hindi', skills: 'Vedic Astrology', rating: 5 },
-// // // // // //             { _id: '6666666666', firstName: 'Acharya Shardha', experience: 15, languages: 'English', skills: 'Tarot, Vedic', rating: 5 },
-// // // // // //             { _id: '5555555555', firstName: 'Pandit Anil Tripathi', experience: 22, languages: 'Hindi, Sanskrit', skills: 'Vedic Pujan', rating: 5 },
-// // // // // //         ];
-// // // // // //         setPandits(demoPandits);
-// // // // // //         setLoading(false);
-// // // // // //     }, []);
-
-// // // // // //     if (loading) {
-// // // // // //         return <div className="flex justify-center items-center h-64">Loading Pandits...</div>;
-// // // // // //     }
-
-// // // // // //     return (
-// // // // // //         <div className="container mx-auto px-4 py-8 mt-16">
-// // // // // //             <div className="bg-yellow-50 p-4 rounded-lg mb-8 text-center">
-// // // // // //                 <h2 className="text-3xl font-bold text-gray-800">Our Expert Pandits</h2>
-// // // // // //                 <p className="text-gray-600 mt-2">Welcome {user?.name || user?.phone || 'User'}!</p>
-// // // // // //             </div>
-            
-// // // // // //             {isPandit && (
-// // // // // //                 <div className="flex justify-end mb-4">
-// // // // // //                     <button 
-// // // // // //                         onClick={() => {
-// // // // // //                             console.log('🔔 Opening Pandit Inbox for:', user?.phone);
-// // // // // //                             setShowPanditInbox(true);
-// // // // // //                         }}
-// // // // // //                         className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 flex items-center gap-2"
-// // // // // //                     >
-// // // // // //                         💬 Messages Inbox
-// // // // // //                     </button>
-// // // // // //                 </div>
-// // // // // //             )}
-            
-// // // // // //             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-// // // // // //                 {pandits.map((pandit) => (
-// // // // // //                     <div key={pandit._id} className="bg-white rounded-xl shadow-lg overflow-hidden border">
-// // // // // //                         <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 p-5 text-center">
-// // // // // //                             <h3 className="text-white font-bold text-lg">{pandit.firstName}</h3>
-// // // // // //                         </div>
-// // // // // //                         <div className="p-4">
-// // // // // //                             <p className="text-gray-700">📅 {pandit.experience} years</p>
-// // // // // //                             <p className="text-gray-700">🗣️ {pandit.languages}</p>
-// // // // // //                             <p className="text-gray-700">🔮 {pandit.skills}</p>
-                            
-// // // // // //                             {!isPandit && (
-// // // // // //                                 <button 
-// // // // // //                                     onClick={() => {
-// // // // // //                                         console.log('📱 Opening chat with:', pandit.firstName, 'ID:', pandit._id);
-// // // // // //                                         setSelectedPandit(pandit);
-// // // // // //                                         setShowChat(true);
-// // // // // //                                     }}
-// // // // // //                                     className="w-full mt-4 bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600"
-// // // // // //                                 >
-// // // // // //                                     💬 Chat Now
-// // // // // //                                 </button>
-// // // // // //                             )}
-// // // // // //                         </div>
-// // // // // //                     </div>
-// // // // // //                 ))}
-// // // // // //             </div>
-
-// // // // // //             {showChat && selectedPandit && user && !isPandit && (
-// // // // // //                 <ChatBox 
-// // // // // //                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-// // // // // //                     panditId={selectedPandit._id}
-// // // // // //                     panditName={selectedPandit.firstName}
-// // // // // //                     onClose={() => {
-// // // // // //                         setShowChat(false);
-// // // // // //                         setSelectedPandit(null);
-// // // // // //                     }}
-// // // // // //                 />
-// // // // // //             )}
-
-// // // // // //             {showPanditInbox && isPandit && (
-// // // // // //                 <PanditInbox 
-// // // // // //                     panditId={user.phone || user.id || user.mobile || '8888888888'}
-// // // // // //                     onClose={() => setShowPanditInbox(false)}
-// // // // // //                 />
-// // // // // //             )}
-// // // // // //         </div>
-// // // // // //     );
-// // // // // // };
-
-// // // // // // export default PanditSection;
-
-
-// // // // // import React, { useState, useEffect } from 'react';
-// // // // // import { useAuth } from '../../context/AuthContext';
-// // // // // import ChatBox from '../Chat/ChatBox';
-// // // // // import VideoCall from '../VideoCall/VideoCall';
-// // // // // // import PanditInbox from '../Pandit/PanditInbox';
-// // // // // import { FaVideo, FaComments } from 'react-icons/fa';
-// // // // // import PanditInbox from '../PanditInbox';
-
-// // // // // const PanditSection = () => {
-// // // // //     const [pandits, setPandits] = useState([]);
-// // // // //     const [loading, setLoading] = useState(true);
-// // // // //     const [selectedPandit, setSelectedPandit] = useState(null);
-// // // // //     const [showChat, setShowChat] = useState(false);
-// // // // //     const [showVideo, setShowVideo] = useState(false);
-// // // // //     const [showPanditInbox, setShowPanditInbox] = useState(false);
-// // // // //     const { user } = useAuth();
-
-// // // // //     const isPandit = user?.phone === '8888888888' || user?.mobile === '8888888888';
-
-// // // // //     useEffect(() => {
-// // // // //         const demoPandits = [
-// // // // //             { _id: '8888888888', firstName: 'Acharya Sheetal', experience: 17, languages: 'Hindi, English', skills: 'Vedic Astrology', rating: 5 },
-// // // // //             { _id: '7777777777', firstName: 'Pandit Suresh Mishra', experience: 10, languages: 'Hindi', skills: 'Vedic Astrology', rating: 5 },
-// // // // //             { _id: '6666666666', firstName: 'Acharya Shardha', experience: 15, languages: 'English', skills: 'Tarot, Vedic', rating: 5 },
-// // // // //             { _id: '5555555555', firstName: 'Pandit Anil Tripathi', experience: 22, languages: 'Hindi, Sanskrit', skills: 'Vedic Pujan', rating: 5 },
-// // // // //         ];
-// // // // //         setPandits(demoPandits);
-// // // // //         setLoading(false);
-// // // // //     }, []);
-
-// // // // //     const handleChat = (pandit) => {
-// // // // //         setSelectedPandit(pandit);
-// // // // //         setShowChat(true);
-// // // // //         setShowVideo(false);
-// // // // //     };
-
-// // // // //     const handleVideoCall = (pandit) => {
-// // // // //         setSelectedPandit(pandit);
-// // // // //         setShowVideo(true);
-// // // // //         setShowChat(false);
-// // // // //     };
-
-// // // // //     if (loading) {
-// // // // //         return <div className="flex justify-center items-center h-64">Loading Pandits...</div>;
-// // // // //     }
-
-// // // // //     return (
-// // // // //         <div className="container mx-auto px-4 py-8 mt-16">
-// // // // //             <div className="bg-yellow-50 p-4 rounded-lg mb-8 text-center">
-// // // // //                 <h2 className="text-3xl font-bold text-gray-800">Our Expert Pandits</h2>
-// // // // //                 <p className="text-gray-600 mt-2">Welcome {user?.name || user?.phone || 'User'}!</p>
-// // // // //             </div>
-            
-// // // // //             {isPandit && (
-// // // // //                 <div className="flex justify-end mb-4">
-// // // // //                     <button 
-// // // // //                         onClick={() => setShowPanditInbox(true)}
-// // // // //                         className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 flex items-center gap-2"
-// // // // //                     >
-// // // // //                         <FaComments /> Messages Inbox
-// // // // //                     </button>
-// // // // //                 </div>
-// // // // //             )}
-            
-// // // // //             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-// // // // //                 {pandits.map((pandit) => (
-// // // // //                     <div key={pandit._id} className="bg-white rounded-xl shadow-lg overflow-hidden border hover:shadow-xl transition">
-// // // // //                         <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 p-5 text-center">
-// // // // //                             <h3 className="text-white font-bold text-lg">{pandit.firstName}</h3>
-// // // // //                             <div className="flex justify-center mt-1">
-// // // // //                                 {[...Array(5)].map((_, i) => (
-// // // // //                                     <span key={i} className="text-yellow-200 text-sm">★</span>
-// // // // //                                 ))}
-// // // // //                             </div>
-// // // // //                         </div>
-// // // // //                         <div className="p-4">
-// // // // //                             <p className="text-gray-700">📅 {pandit.experience} years</p>
-// // // // //                             <p className="text-gray-700">🗣️ {pandit.languages}</p>
-// // // // //                             <p className="text-gray-700">🔮 {pandit.skills}</p>
-                            
-// // // // //                             {!isPandit && (
-// // // // //                                 <div className="flex gap-2 mt-4">
-// // // // //                                     <button 
-// // // // //                                         onClick={() => handleChat(pandit)}
-// // // // //                                         className="flex-1 bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600 flex items-center justify-center gap-1"
-// // // // //                                     >
-// // // // //                                         <FaComments size={14} /> Chat
-// // // // //                                     </button>
-// // // // //                                     <button 
-// // // // //                                         onClick={() => handleVideoCall(pandit)}
-// // // // //                                         className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 flex items-center justify-center gap-1"
-// // // // //                                     >
-// // // // //                                         <FaVideo size={14} /> Call
-// // // // //                                     </button>
-// // // // //                                 </div>
-// // // // //                             )}
-// // // // //                         </div>
-// // // // //                     </div>
-// // // // //                 ))}
-// // // // //             </div>
-
-// // // // //             {showChat && selectedPandit && user && !isPandit && (
-// // // // //                 <ChatBox 
-// // // // //                     currentUserId={user.phone || user.id || user.mobile}
-// // // // //                     panditId={selectedPandit._id}
-// // // // //                     panditName={selectedPandit.firstName}
-// // // // //                     onClose={() => {
-// // // // //                         setShowChat(false);
-// // // // //                         setSelectedPandit(null);
-// // // // //                     }}
-// // // // //                 />
-// // // // //             )}
-
-// // // // //             {showVideo && selectedPandit && user && !isPandit && (
-// // // // //                 <VideoCall 
-// // // // //                     currentUserId={user.phone || user.id || user.mobile}
-// // // // //                     targetUserId={selectedPandit._id}
-// // // // //                     targetName={selectedPandit.firstName}
-// // // // //                     onClose={() => {
-// // // // //                         setShowVideo(false);
-// // // // //                         setSelectedPandit(null);
-// // // // //                     }}
-// // // // //                 />
-// // // // //             )}
-
-// // // // //             {showPanditInbox && isPandit && (
-// // // // //                 <PanditInbox 
-// // // // //                     panditId={user.phone || user.id || user.mobile}
-// // // // //                     onClose={() => setShowPanditInbox(false)}
-// // // // //                 />
-// // // // //             )}
-// // // // //         </div>
-// // // // //     );
-// // // // // };
-
-// // // // // export default PanditSection;
-
-// // // // import React, { useState, useEffect } from 'react';
-// // // // import { useAuth } from '../../context/AuthContext';
-// // // // import ChatBox from '../Chat/ChatBox';
-// // // // import VideoCallChat from '../VideoCallChat';
-// // // // import { FaVideo, FaComments } from 'react-icons/fa';
-
-// // // // const PanditSection = () => {
-// // // //     const [pandits, setPandits] = useState([]);
-// // // //     const [loading, setLoading] = useState(true);
-// // // //     const [selectedPandit, setSelectedPandit] = useState(null);
-// // // //     const [showChat, setShowChat] = useState(false);
-// // // //     const [showCallChat, setShowCallChat] = useState(false);
-// // // //     const [callChatUser, setCallChatUser] = useState(null);
-// // // //     const { user } = useAuth();
-
-// // // //     const isPandit = user?.phone === '8888888888' || user?.mobile === '8888888888';
-
-// // // //     useEffect(() => {
-// // // //         const demoPandits = [
-// // // //             { _id: '8888888888', firstName: 'Acharya Sheetal', experience: 17, languages: 'Hindi, English', skills: 'Vedic Astrology', rating: 5 },
-// // // //             { _id: '7777777777', firstName: 'Pandit Suresh Mishra', experience: 10, languages: 'Hindi', skills: 'Vedic Astrology', rating: 5 },
-// // // //             { _id: '6666666666', firstName: 'Acharya Shardha', experience: 15, languages: 'English', skills: 'Tarot, Vedic', rating: 5 },
-// // // //             { _id: '5555555555', firstName: 'Pandit Anil Tripathi', experience: 22, languages: 'Hindi, Sanskrit', skills: 'Vedic Pujan', rating: 5 },
-// // // //         ];
-// // // //         setPandits(demoPandits);
-// // // //         setLoading(false);
-// // // //     }, []);
-
-// // // //     const handleChat = (pandit) => {
-// // // //         setSelectedPandit(pandit);
-// // // //         setShowChat(true);
-// // // //         setShowCallChat(false);
-// // // //     };
-
-// // // //    const handleVideoCall = (pandit) => {
-// // // //     console.log('📞 Calling Pandit:', pandit.firstName, 'ID:', pandit._id);
-    
-// // // //     // Direct socket emit
-// // // //     const tempSocket = io('http://localhost:5000');
-// // // //     tempSocket.on('connect', () => {
-// // // //         tempSocket.emit('call-user', {
-// // // //             to: String(pandit._id),
-// // // //             from: String(user?.phone || '9999999999'),
-// // // //             signal: 'call_request'
-// // // //         });
-// // // //         console.log('✅ Call emitted to:', pandit._id);
-// // // //         setTimeout(() => tempSocket.close(), 1000);
-// // // //     });
-    
-// // // //     setCallChatUser(pandit);
-// // // //     setShowCallChat(true);
-// // // // };
-// // // //     if (loading) {
-// // // //         return <div className="flex justify-center items-center h-64">Loading Pandits...</div>;
-// // // //     }
-
-// // // //     return (
-// // // //         <div className="container mx-auto px-4 py-8 mt-16">
-// // // //             <div className="bg-yellow-50 p-4 rounded-lg mb-8 text-center">
-// // // //                 <h2 className="text-3xl font-bold text-gray-800">Our Expert Pandits</h2>
-// // // //                 <p className="text-gray-600 mt-2">Welcome {user?.name || user?.phone || 'User'}!</p>
-// // // //             </div>
-            
-// // // //             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-// // // //                 {pandits.map((pandit) => (
-// // // //                     <div key={pandit._id} className="bg-white rounded-xl shadow-lg overflow-hidden border hover:shadow-xl transition">
-// // // //                         <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 p-5 text-center">
-// // // //                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-2">
-// // // //                                 <span className="text-yellow-500 text-2xl">🔱</span>
-// // // //                             </div>
-// // // //                             <h3 className="text-white font-bold text-lg">{pandit.firstName}</h3>
-// // // //                             <div className="flex justify-center mt-1">
-// // // //                                 {[...Array(5)].map((_, i) => (
-// // // //                                     <span key={i} className="text-yellow-200 text-sm">★</span>
-// // // //                                 ))}
-// // // //                             </div>
-// // // //                         </div>
-// // // //                         <div className="p-4">
-// // // //                             <p className="text-gray-700 text-sm">📅 {pandit.experience} years</p>
-// // // //                             <p className="text-gray-700 text-sm mt-1">🗣️ {pandit.languages}</p>
-// // // //                             <p className="text-gray-700 text-sm mt-1">🔮 {pandit.skills}</p>
-                            
-// // // //                             {!isPandit && (
-// // // //                                 <div className="flex gap-2 mt-4">
-// // // //                                     <button 
-// // // //                                         onClick={() => handleChat(pandit)}
-// // // //                                         className="flex-1 bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600 flex items-center justify-center gap-1 text-sm"
-// // // //                                     >
-// // // //                                         <FaComments size={14} /> Chat
-// // // //                                     </button>
-// // // //                                     <button 
-// // // //                                         onClick={() => handleVideoCall(pandit)}
-// // // //                                         className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 flex items-center justify-center gap-1 text-sm"
-// // // //                                     >
-// // // //                                         <FaVideo size={14} /> Call
-// // // //                                     </button>
-// // // //                                 </div>
-// // // //                             )}
-// // // //                         </div>
-// // // //                     </div>
-// // // //                 ))}
-// // // //             </div>
-
-// // // //             {/* Chat Box - Only Chat */}
-// // // //             {showChat && selectedPandit && user && !isPandit && (
-// // // //                 <ChatBox 
-// // // //                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-// // // //                     panditId={selectedPandit._id}
-// // // //                     panditName={selectedPandit.firstName}
-// // // //                     onClose={() => {
-// // // //                         setShowChat(false);
-// // // //                         setSelectedPandit(null);
-// // // //                     }}
-// // // //                 />
-// // // //             )}
-
-// // // //             {/* Video Call + Chat Together */}
-// // // //             {showCallChat && callChatUser && user && !isPandit && (
-// // // //                 <VideoCallChat
-// // // //                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-// // // //                     targetUserId={callChatUser._id}
-// // // //                     targetName={callChatUser.firstName}
-// // // //                     isInitiator={true}
-// // // //                     onClose={() => {
-// // // //                         setShowCallChat(false);
-// // // //                         setCallChatUser(null);
-// // // //                     }}
-// // // //                 />
-// // // //             )}
-// // // //         </div>
-// // // //     );
-// // // // };
-
-// // // // export default PanditSection;
-
-// // // import React, { useState, useEffect } from 'react';
-// // // import io from 'socket.io-client';
-// // // import { useAuth } from '../../context/AuthContext';
-// // // import ChatBox from '../Chat/ChatBox';
-// // // import VideoCallChat from '../VideoCallChat';
-// // // import { FaVideo, FaComments } from 'react-icons/fa';
-
-// // // const PanditSection = () => {
-// // //     const [pandits, setPandits] = useState([]);
-// // //     const [loading, setLoading] = useState(true);
-// // //     const [selectedPandit, setSelectedPandit] = useState(null);
-// // //     const [showChat, setShowChat] = useState(false);
-// // //     const [showCallChat, setShowCallChat] = useState(false);
-// // //     const [callChatUser, setCallChatUser] = useState(null);
-// // //     const { user } = useAuth();
-
-// // //     const isPandit = user?.phone === '8888888888' || user?.mobile === '8888888888';
-
-// // //     useEffect(() => {
-// // //         const demoPandits = [
-// // //             { _id: '8888888888', firstName: 'Acharya Sheetal', experience: 17, languages: 'Hindi, English', skills: 'Vedic Astrology', rating: 5 },
-// // //             { _id: '7777777777', firstName: 'Pandit Suresh Mishra', experience: 10, languages: 'Hindi', skills: 'Vedic Astrology', rating: 5 },
-// // //             { _id: '6666666666', firstName: 'Acharya Shardha', experience: 15, languages: 'English', skills: 'Tarot, Vedic', rating: 5 },
-// // //             { _id: '5555555555', firstName: 'Pandit Anil Tripathi', experience: 22, languages: 'Hindi, Sanskrit', skills: 'Vedic Pujan', rating: 5 },
-// // //         ];
-// // //         setPandits(demoPandits);
-// // //         setLoading(false);
-// // //     }, []);
-
-// // //     const handleChat = (pandit) => {
-// // //         setSelectedPandit(pandit);
-// // //         setShowChat(true);
-// // //         setShowCallChat(false);
-// // //     };
-
- 
-// // // const handleVideoCall = (pandit) => {
-// // //     console.log('📞 Calling Pandit:', pandit.firstName, 'ID:', pandit._id);
-    
-// // //     // Direct socket emit
-// // //     const tempSocket = io('http://localhost:5000');
-// // //     tempSocket.on('connect', () => {
-// // //         tempSocket.emit('call-user', {
-// // //             to: String(pandit._id),
-// // //             from: String(user?.phone || '9999999999'),
-// // //             signal: 'call_request'
-// // //         });
-// // //         console.log('✅ Call emitted to:', pandit._id);
-// // //         setTimeout(() => tempSocket.close(), 1000);
-// // //     });
-    
-// // //     alert(`Calling ${pandit.firstName}...`);
-// // // };
-// // //     if (loading) {
-// // //         return <div className="flex justify-center items-center h-64">Loading Pandits...</div>;
-// // //     }
-
-// // //     return (
-// // //         <div className="container mx-auto px-4 py-8 mt-16">
-// // //             <div className="bg-yellow-50 p-4 rounded-lg mb-8 text-center">
-// // //                 <h2 className="text-3xl font-bold text-gray-800">Our Expert Pandits</h2>
-// // //                 <p className="text-gray-600 mt-2">Welcome {user?.name || user?.phone || 'User'}!</p>
-// // //             </div>
-            
-// // //             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-// // //                 {pandits.map((pandit) => (
-// // //                     <div key={pandit._id} className="bg-white rounded-xl shadow-lg overflow-hidden border hover:shadow-xl transition">
-// // //                         <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 p-5 text-center">
-// // //                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-2">
-// // //                                 <span className="text-yellow-500 text-2xl">🔱</span>
-// // //                             </div>
-// // //                             <h3 className="text-white font-bold text-lg">{pandit.firstName}</h3>
-// // //                             <div className="flex justify-center mt-1">
-// // //                                 {[...Array(5)].map((_, i) => (
-// // //                                     <span key={i} className="text-yellow-200 text-sm">★</span>
-// // //                                 ))}
-// // //                             </div>
-// // //                         </div>
-// // //                         <div className="p-4">
-// // //                             <p className="text-gray-700 text-sm">📅 {pandit.experience} years</p>
-// // //                             <p className="text-gray-700 text-sm mt-1">🗣️ {pandit.languages}</p>
-// // //                             <p className="text-gray-700 text-sm mt-1">🔮 {pandit.skills}</p>
-                            
-// // //                             {!isPandit && (
-// // //                                 <div className="flex gap-2 mt-4">
-// // //                                     <button 
-// // //                                         onClick={() => handleChat(pandit)}
-// // //                                         className="flex-1 bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600 flex items-center justify-center gap-1 text-sm"
-// // //                                     >
-// // //                                         <FaComments size={14} /> Chat
-// // //                                     </button>
-// // //                                     <button 
-// // //                                         onClick={() => handleVideoCall(pandit)}
-// // //                                         className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 flex items-center justify-center gap-1 text-sm"
-// // //                                     >
-// // //                                         <FaVideo size={14} /> Call
-// // //                                     </button>
-// // //                                 </div>
-// // //                             )}
-// // //                         </div>
-// // //                     </div>
-// // //                 ))}
-// // //             </div>
-
-// // //             {/* Chat Box - Only Chat */}
-// // //             {showChat && selectedPandit && user && !isPandit && (
-// // //                 <ChatBox 
-// // //                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-// // //                     panditId={selectedPandit._id}
-// // //                     panditName={selectedPandit.firstName}
-// // //                     onClose={() => {
-// // //                         setShowChat(false);
-// // //                         setSelectedPandit(null);
-// // //                     }}
-// // //                 />
-// // //             )}
-
-// // //             {/* Video Call + Chat Together */}
-// // //             {showCallChat && callChatUser && user && !isPandit && (
-// // //                 <VideoCallChat
-// // //                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-// // //                     targetUserId={callChatUser._id}
-// // //                     targetName={callChatUser.firstName}
-// // //                     isInitiator={true}
-// // //                     onClose={() => {
-// // //                         setShowCallChat(false);
-// // //                         setCallChatUser(null);
-// // //                     }}
-// // //                 />
-// // //             )}
-// // //         </div>
-// // //     );
-// // // };
-
-// // // export default PanditSection;
-
-// // import React, { useState, useEffect } from 'react';
-// // import io from 'socket.io-client';
-// // import { useAuth } from '../../context/AuthContext';
-// // import ChatBox from '../Chat/ChatBox';
-// // import VideoCallChat from '../VideoCallChat';
-// // import { FaVideo, FaComments } from 'react-icons/fa';
-
-// // const PanditSection = () => {
-// //     const [pandits, setPandits] = useState([]);
-// //     const [loading, setLoading] = useState(true);
-// //     const [selectedPandit, setSelectedPandit] = useState(null);
-// //     const [showChat, setShowChat] = useState(false);
-// //     const [showCallChat, setShowCallChat] = useState(false);
-// //     const [callChatUser, setCallChatUser] = useState(null);
-// //     const { user } = useAuth();
-
-// //     const isPandit = user?.phone === '8888888888' || user?.mobile === '8888888888';
-
-// //     useEffect(() => {
-// //         const demoPandits = [
-// //             { _id: '8888888888', firstName: 'Acharya Sheetal', experience: 17, languages: 'Hindi, English', skills: 'Vedic Astrology', rating: 5 },
-// //             { _id: '7777777777', firstName: 'Pandit Suresh Mishra', experience: 10, languages: 'Hindi', skills: 'Vedic Astrology', rating: 5 },
-// //             { _id: '6666666666', firstName: 'Acharya Shardha', experience: 15, languages: 'English', skills: 'Tarot, Vedic', rating: 5 },
-// //             { _id: '5555555555', firstName: 'Pandit Anil Tripathi', experience: 22, languages: 'Hindi, Sanskrit', skills: 'Vedic Pujan', rating: 5 },
-// //         ];
-// //         setPandits(demoPandits);
-// //         setLoading(false);
-// //     }, []);
-
-// //     const handleChat = (pandit) => {
-// //         setSelectedPandit(pandit);
-// //         setShowChat(true);
-// //         setShowCallChat(false);
-// //     };
-
-// //     // ✅ Call Handler - User Side
-// //     const handleVideoCall = (pandit) => {
-// //         console.log('📞 Opening Call UI for:', pandit.firstName);
-// //         setCallChatUser(pandit);
-// //         setShowCallChat(true);
-// //         setShowChat(false);
-// //     };
-
-// //     if (loading) {
-// //         return <div className="flex justify-center items-center h-64">Loading Pandits...</div>;
-// //     }
-
-// //     return (
-// //         <div className="container mx-auto px-4 py-8 mt-16">
-// //             <div className="bg-yellow-50 p-4 rounded-lg mb-8 text-center">
-// //                 <h2 className="text-3xl font-bold text-gray-800">Our Expert Pandits</h2>
-// //                 <p className="text-gray-600 mt-2">Welcome {user?.name || user?.phone || 'User'}!</p>
-// //             </div>
-            
-// //             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-// //                 {pandits.map((pandit) => (
-// //                     <div key={pandit._id} className="bg-white rounded-xl shadow-lg overflow-hidden border hover:shadow-xl transition">
-// //                         <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 p-5 text-center">
-// //                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-2">
-// //                                 <span className="text-yellow-500 text-2xl">🔱</span>
-// //                             </div>
-// //                             <h3 className="text-white font-bold text-lg">{pandit.firstName}</h3>
-// //                             <div className="flex justify-center mt-1">
-// //                                 {[...Array(5)].map((_, i) => (
-// //                                     <span key={i} className="text-yellow-200 text-sm">★</span>
-// //                                 ))}
-// //                             </div>
-// //                         </div>
-// //                         <div className="p-4">
-// //                             <p className="text-gray-700 text-sm">📅 {pandit.experience} years</p>
-// //                             <p className="text-gray-700 text-sm mt-1">🗣️ {pandit.languages}</p>
-// //                             <p className="text-gray-700 text-sm mt-1">🔮 {pandit.skills}</p>
-                            
-// //                             {!isPandit && (
-// //                                 <div className="flex gap-2 mt-4">
-// //                                     <button 
-// //                                         onClick={() => handleChat(pandit)}
-// //                                         className="flex-1 bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600 flex items-center justify-center gap-1 text-sm"
-// //                                     >
-// //                                         <FaComments size={14} /> Chat
-// //                                     </button>
-// //                                     <button 
-// //                                         onClick={() => handleVideoCall(pandit)}
-// //                                         className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 flex items-center justify-center gap-1 text-sm"
-// //                                     >
-// //                                         <FaVideo size={14} /> Call
-// //                                     </button>
-// //                                 </div>
-// //                             )}
-// //                         </div>
-// //                     </div>
-// //                 ))}
-// //             </div>
-
-// //             {/* Chat Box - Only Chat */}
-// //             {showChat && selectedPandit && user && !isPandit && (
-// //                 <ChatBox 
-// //                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-// //                     panditId={selectedPandit._id}
-// //                     panditName={selectedPandit.firstName}
-// //                     onClose={() => {
-// //                         setShowChat(false);
-// //                         setSelectedPandit(null);
-// //                     }}
-// //                 />
-// //             )}
-
-// //             {/* ✅ Video Call + Chat Together - User Side */}
-// //             {showCallChat && callChatUser && user && !isPandit && (
-// //                 <VideoCallChat
-// //                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-// //                     targetUserId={callChatUser._id}
-// //                     targetName={callChatUser.firstName}
-// //                     isInitiator={true}
-// //                     onClose={() => {
-// //                         setShowCallChat(false);
-// //                         setCallChatUser(null);
-// //                     }}
-// //                 />
-// //             )}
-// //         </div>
-// //     );
-// // };
-
-// // export default PanditSection;
-
-// import React, { useState, useEffect } from 'react';
-// import io from 'socket.io-client';
-// import { useAuth } from '../../context/AuthContext';
-// import ChatBox from '../Chat/ChatBox';
-// import VideoCallChat from '../VideoCallChat';
-// import { FaVideo, FaComments } from 'react-icons/fa';
-
-// const PanditSection = () => {
-//     const [pandits, setPandits] = useState([]);
-//     const [loading, setLoading] = useState(true);
-//     const [selectedPandit, setSelectedPandit] = useState(null);
-//     const [showChat, setShowChat] = useState(false);
-//     const [showCallChat, setShowCallChat] = useState(false);
-//     const [callChatUser, setCallChatUser] = useState(null);
-//     const { user } = useAuth();
-
-//     const isPandit = user?.phone === '8888888888' || user?.mobile === '8888888888';
-
-//     useEffect(() => {
-//         const demoPandits = [
-//             { _id: '8888888888', firstName: 'Acharya Sheetal', experience: 17, languages: 'Hindi, English', skills: 'Vedic Astrology', rating: 5 },
-//             { _id: '7777777777', firstName: 'Pandit Suresh Mishra', experience: 10, languages: 'Hindi', skills: 'Vedic Astrology', rating: 5 },
-//             { _id: '6666666666', firstName: 'Acharya Shardha', experience: 15, languages: 'English', skills: 'Tarot, Vedic', rating: 5 },
-//             { _id: '5555555555', firstName: 'Pandit Anil Tripathi', experience: 22, languages: 'Hindi, Sanskrit', skills: 'Vedic Pujan', rating: 5 },
-//         ];
-//         setPandits(demoPandits);
-//         setLoading(false);
-//     }, []);
-
-//     const handleChat = (pandit) => {
-//         setSelectedPandit(pandit);
-//         setShowChat(true);
-//         setShowCallChat(false);
-//     };
-
-//     // ✅ Call Handler - Send notification and open call UI
-// const handleVideoCall = (pandit) => {
-//     console.log('📞 Opening Call UI for:', pandit.firstName);
-//     setCallChatUser(pandit);
-//     setShowCallChat(true);
-//     setShowChat(false);
-// };
-//     if (loading) {
-//         return <div className="flex justify-center items-center h-64">Loading Pandits...</div>;
-//     }
-
-//     return (
-//         <div className="container mx-auto px-4 py-8 mt-16">
-//             <div className="bg-yellow-50 p-4 rounded-lg mb-8 text-center">
-//                 <h2 className="text-3xl font-bold text-gray-800">Our Expert Pandits</h2>
-//                 <p className="text-gray-600 mt-2">Welcome {user?.name || user?.phone || 'User'}!</p>
-//             </div>
-            
-//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-//                 {pandits.map((pandit) => (
-//                     <div key={pandit._id} className="bg-white rounded-xl shadow-lg overflow-hidden border hover:shadow-xl transition">
-//                         <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 p-5 text-center">
-//                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-2">
-//                                 <span className="text-yellow-500 text-2xl">🔱</span>
-//                             </div>
-//                             <h3 className="text-white font-bold text-lg">{pandit.firstName}</h3>
-//                             <div className="flex justify-center mt-1">
-//                                 {[...Array(5)].map((_, i) => (
-//                                     <span key={i} className="text-yellow-200 text-sm">★</span>
-//                                 ))}
-//                             </div>
-//                         </div>
-//                         <div className="p-4">
-//                             <p className="text-gray-700 text-sm">📅 {pandit.experience} years</p>
-//                             <p className="text-gray-700 text-sm mt-1">🗣️ {pandit.languages}</p>
-//                             <p className="text-gray-700 text-sm mt-1">🔮 {pandit.skills}</p>
-                            
-//                             {!isPandit && (
-//                                 <div className="flex gap-2 mt-4">
-//                                     <button 
-//                                         onClick={() => handleChat(pandit)}
-//                                         className="flex-1 bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600 flex items-center justify-center gap-1 text-sm"
-//                                     >
-//                                         <FaComments size={14} /> Chat
-//                                     </button>
-//                                     <button 
-//                                         onClick={() => handleVideoCall(pandit)}
-//                                         className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 flex items-center justify-center gap-1 text-sm"
-//                                     >
-//                                         <FaVideo size={14} /> Call
-//                                     </button>
-//                                 </div>
-//                             )}
-//                         </div>
-//                     </div>
-//                 ))}
-//             </div>
-
-//             {/* Chat Box - Only Chat */}
-//             {showChat && selectedPandit && user && !isPandit && (
-//                 <ChatBox 
-//                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-//                     panditId={selectedPandit._id}
-//                     panditName={selectedPandit.firstName}
-//                     onClose={() => {
-//                         setShowChat(false);
-//                         setSelectedPandit(null);
-//                     }}
-//                 />
-//             )}
-
-//             {/* Voice Call UI - User Side */}
-//             {showCallChat && callChatUser && user && !isPandit && (
-//                 <VideoCallChat
-//                     currentUserId={user.phone || user.id || user.mobile || '9999999999'}
-//                     targetUserId={callChatUser._id}
-//                     targetName={callChatUser.firstName}
-//                     isInitiator={true}
-//                     onClose={() => {
-//                         setShowCallChat(false);
-//                         setCallChatUser(null);
-//                     }}
-//                 />
-//             )}
-//         </div>
-//     );
-// };
-
-// export default PanditSection;
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import ChatBox from '../Chat/ChatBox';
+import { supabase } from '../../supabaseClient';
+// import ChatBox from '../ChatBox';
 import VideoCallChat from '../VideoCallChat';
-import PanditCallReceiver from '../PanditCallReceiver';
+import ChatBox from '../Chat/ChatBox';
 
 const PanditSection = () => {
-    const [pandits, setPandits] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedPandit, setSelectedPandit] = useState(null);
-    const [showChat, setShowChat] = useState(false);
-    const [showCallChat, setShowCallChat] = useState(false);
-    const [callChatUser, setCallChatUser] = useState(null);
     const { user } = useAuth();
+    const currentUserId = user?.id || user?.phone || 'USER_TEMP_ID';
+    
+    const [panditsList, setPanditsList] = useState([]);
+    const [activeChatPandit, setActiveChatPandit] = useState(null);
+    const [activeCall, setActiveCall] = useState(null);
+    const [unreadCounts, setUnreadCounts] = useState({});
+    const [onlinePandits, setOnlinePandits] = useState({});
+    const [notification, setNotification] = useState(null);
+    
+    const channelRef = useRef(null);
 
-    const isPandit = user?.phone === '8888888888' || user?.mobile === '8888888888';
-    const currentUserId = user?.phone || user?.mobile || user?.id || '9999999999';
+    // Show notification
+    const showNotification = (msg) => {
+        setNotification(msg);
+        setTimeout(() => setNotification(null), 3000);
+    };
+
+    // Load pandits from database
+    const loadPandits = async () => {
+        const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'pandit');
+        
+        if (data) {
+            setPanditsList(data);
+            data.forEach(pandit => {
+                checkOnlineStatus(pandit.id);
+                loadUnreadCount(pandit.id);
+            });
+        }
+    };
+
+    const checkOnlineStatus = async (panditId) => {
+        const { data } = await supabase
+            .from('profiles')
+            .select('is_online')
+            .eq('id', panditId)
+            .single();
+        if (data) {
+            setOnlinePandits(prev => ({ ...prev, [panditId]: data.is_online }));
+        }
+    };
+
+    const loadUnreadCount = async (panditId) => {
+        const { count } = await supabase
+            .from('unified_interactions')
+            .select('*', { count: 'exact', head: true })
+            .eq('action_type', 'message')
+            .eq('receiver_id', currentUserId)
+            .eq('sender_id', panditId)
+            .eq('is_read', false);
+        
+        if (count > 0) {
+            setUnreadCounts(prev => ({ ...prev, [panditId]: count }));
+        }
+    };
+
+    // ✅ FIXED: Setup realtime - ALL .on() BEFORE .subscribe()
+    const setupRealtime = () => {
+        // First, check if channel exists and remove it
+        if (channelRef.current) {
+            supabase.removeChannel(channelRef.current);
+        }
+        
+        // Create new channel
+        const channel = supabase.channel('user-messages');
+        
+        // ✅ Add ALL listeners BEFORE subscribe
+        channel
+            .on('postgres_changes', 
+                { 
+                    event: 'INSERT', 
+                    schema: 'public', 
+                    table: 'unified_interactions',
+                    filter: `receiver_id=eq.${currentUserId}`
+                },
+                (payload) => {
+                    const data = payload.new;
+                    console.log('New message received:', data);
+                    
+                    if (data.action_type === 'message') {
+                        showNotification(`📩 New message from Pandit`);
+                        
+                        // Update unread count
+                        setUnreadCounts(prev => ({
+                            ...prev,
+                            [data.sender_id]: (prev[data.sender_id] || 0) + 1
+                        }));
+                        
+                        // Browser notification
+                        if (Notification.permission === 'granted') {
+                            new Notification('New Message', {
+                                body: `Message from Pandit`,
+                                icon: '/logo.png'
+                            });
+                        }
+                    }
+                }
+            )
+            .on('postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'profiles',
+                    filter: `role=eq.pandit`
+                },
+                (payload) => {
+                    if (payload.new.is_online !== payload.old.is_online) {
+                        setOnlinePandits(prev => ({
+                            ...prev,
+                            [payload.new.id]: payload.new.is_online
+                        }));
+                    }
+                }
+            );
+        
+        // ✅ Now subscribe
+        channel.subscribe((status) => {
+            console.log('Channel status:', status);
+        });
+        
+        channelRef.current = channel;
+    };
+
+    const updateOnlineStatus = async (isOnline) => {
+        await supabase
+            .from('profiles')
+            .update({ is_online: isOnline, last_seen: new Date().toISOString() })
+            .eq('id', currentUserId);
+    };
 
     useEffect(() => {
-        const demoPandits = [
-            { _id: '8888888888', firstName: 'Acharya Sheetal', experience: 17, languages: 'Hindi, English', skills: 'Vedic Astrology', rating: 5, image: '🔱' },
-            { _id: '7777777777', firstName: 'Pandit Suresh Mishra', experience: 10, languages: 'Hindi', skills: 'Vedic Astrology', rating: 5, image: '🔱' },
-            { _id: '6666666666', firstName: 'Acharya Shardha', experience: 15, languages: 'English', skills: 'Tarot, Vedic', rating: 5, image: '🔱' },
-            { _id: '5555555555', firstName: 'Pandit Anil Tripathi', experience: 22, languages: 'Hindi, Sanskrit', skills: 'Vedic Pujan', rating: 5, image: '🔱' },
-        ];
-        setPandits(demoPandits);
-        setLoading(false);
-    }, []);
+        loadPandits();
+        setupRealtime();
+        updateOnlineStatus(true);
+        
+        // Request notification permission
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        
+        return () => {
+            updateOnlineStatus(false);
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+            }
+        };
+    }, [currentUserId]);
 
-    const handleChat = (pandit) => {
-        console.log('💬 Opening chat with:', pandit.firstName);
-        setSelectedPandit(pandit);
-        setShowChat(true);
-        setShowCallChat(false);
+    const openChat = (pandit) => {
+        setActiveChatPandit(pandit);
+        setUnreadCounts(prev => ({ ...prev, [pandit.id]: 0 }));
     };
 
-    const handleVideoCall = (pandit) => {
-        console.log('📞 Calling pandit:', pandit.firstName);
-        console.log('📞 Target ID:', pandit._id);
-        setCallChatUser(pandit);
-        setShowCallChat(true);
-        setShowChat(false);
+    const initiateCall = (pandit) => {
+        setActiveCall({
+            id: pandit.id,
+            name: pandit.full_name,
+            isInitiator: true
+        });
     };
-
-    if (loading) {
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '64vh' }}>
-                <div>Loading Pandits...</div>
-            </div>
-        );
-    }
 
     return (
-        <div style={{ padding: '20px', marginTop: '70px' }}>
-            {/* Pandit Call Receiver - Only for Pandit */}
-            {isPandit && <PanditCallReceiver />}
-            
+        <div className="min-h-screen bg-gray-100 p-6">
+            {/* Notification Toast */}
+            {notification && (
+                <div className="fixed top-20 right-5 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce">
+                    {notification}
+                </div>
+            )}
+
             {/* Header */}
-            <div style={{ 
-                backgroundColor: '#fef3c7', 
-                padding: '16px', 
-                borderRadius: '8px', 
-                marginBottom: '32px', 
-                textAlign: 'center' 
-            }}>
-                <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>
-                    Our Expert Pandits
-                </h2>
-                <p style={{ color: '#4b5563', marginTop: '8px' }}>
-                    Welcome {user?.name || user?.phone || 'User'}!
-                </p>
-                {isPandit && (
-                    <p style={{ color: '#16a34a', marginTop: '8px', fontWeight: 'bold' }}>
-                        🟢 You are Online as Pandit
-                    </p>
-                )}
+            <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-800">🔱 Astrology User Panel</h1>
+                <p className="text-gray-500 mt-1">My ID: {currentUserId}</p>
+                <p className="text-green-500 text-sm">🟢 Online</p>
             </div>
-            
+
             {/* Pandit Cards Grid */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '24px'
-            }}>
-                {pandits.map((pandit) => (
-                    <div key={pandit._id} style={{
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                        overflow: 'hidden',
-                        border: '1px solid #e5e7eb'
-                    }}>
-                        {/* Header with gradient */}
-                        <div style={{
-                            background: 'linear-gradient(135deg, #fbbf24, #d97706)',
-                            padding: '20px',
-                            textAlign: 'center'
-                        }}>
-                            <div style={{
-                                width: '64px',
-                                height: '64px',
-                                backgroundColor: 'white',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                margin: '0 auto 8px auto'
-                            }}>
-                                <span style={{ fontSize: '28px', color: '#d97706' }}>🔱</span>
-                            </div>
-                            <h3 style={{ color: 'white', fontWeight: 'bold', fontSize: '18px', margin: '8px 0 0 0' }}>
-                                {pandit.firstName}
-                            </h3>
-                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
-                                {[...Array(5)].map((_, i) => (
-                                    <span key={i} style={{ color: '#fef08a', fontSize: '14px' }}>★</span>
-                                ))}
-                            </div>
-                        </div>
-                        
-                        {/* Body */}
-                        <div style={{ padding: '16px' }}>
-                            <p style={{ color: '#374151', fontSize: '14px', margin: '4px 0' }}>
-                                📅 {pandit.experience} years
-                            </p>
-                            <p style={{ color: '#374151', fontSize: '14px', margin: '8px 0 4px' }}>
-                                🗣️ {pandit.languages}
-                            </p>
-                            <p style={{ color: '#374151', fontSize: '14px', margin: '8px 0 4px' }}>
-                                🔮 {pandit.skills}
-                            </p>
-                            
-                            {/* ✅ BUTTONS - YAHAN DIKHENGE AB */}
-                            {!isPandit && (
-                                <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+            <div className="max-w-6xl mx-auto">
+                <h2 className="text-xl font-semibold text-gray-700 mb-4">📿 Available Pandits</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {panditsList.map((pandit) => (
+                        <div key={pandit.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                            <div className="p-6">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-2xl">
+                                            🙏
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-gray-800">{pandit.full_name}</h3>
+                                            <p className="text-xs text-gray-500">Vedic Astrologer</p>
+                                        </div>
+                                    </div>
+                                    <div className={`w-2 h-2 rounded-full ${onlinePandits[pandit.id] ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+                                </div>
+                                
+                                <div className="flex gap-3 mt-4">
                                     <button 
-                                        onClick={() => handleChat(pandit)}
-                                        style={{
-                                            flex: 1,
-                                            backgroundColor: '#f59e0b',
-                                            color: 'white',
-                                            padding: '8px 12px',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            cursor: 'pointer',
-                                            fontSize: '14px',
-                                            fontWeight: '500',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '6px'
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#d97706'}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#f59e0b'}
+                                        onClick={() => openChat(pandit)}
+                                        className="flex-1 bg-yellow-500 text-white py-2 rounded-xl font-semibold hover:bg-yellow-600 transition flex items-center justify-center gap-2"
                                     >
                                         💬 Chat
+                                        {unreadCounts[pandit.id] > 0 && (
+                                            <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                                                {unreadCounts[pandit.id]}
+                                            </span>
+                                        )}
                                     </button>
                                     <button 
-                                        onClick={() => handleVideoCall(pandit)}
-                                        style={{
-                                            flex: 1,
-                                            backgroundColor: '#22c55e',
-                                            color: 'white',
-                                            padding: '8px 12px',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            cursor: 'pointer',
-                                            fontSize: '14px',
-                                            fontWeight: '500',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '6px'
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#16a34a'}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#22c55e'}
+                                        onClick={() => initiateCall(pandit)}
+                                        className="flex-1 bg-green-600 text-white py-2 rounded-xl font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
                                     >
                                         📞 Call
                                     </button>
                                 </div>
-                            )}
-                            
-                            {isPandit && (
-                                <div style={{ marginTop: '16px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
-                                    📞 Waiting for calls...
-                                </div>
-                            )}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
-            {/* Chat Box Modal */}
-            {showChat && selectedPandit && user && !isPandit && (
+            {/* Active Chat */}
+            {activeChatPandit && (
                 <ChatBox 
                     currentUserId={currentUserId}
-                    panditId={selectedPandit._id}
-                    panditName={selectedPandit.firstName}
-                    onClose={() => {
-                        setShowChat(false);
-                        setSelectedPandit(null);
-                    }}
+                    panditId={activeChatPandit.id}
+                    panditName={activeChatPandit.full_name}
+                    onClose={() => setActiveChatPandit(null)}
                 />
             )}
 
-            {/* Voice Call UI - User Side */}
-            {showCallChat && callChatUser && user && !isPandit && (
-                <VideoCallChat
+            {/* Active Call */}
+            {activeCall && (
+                <VideoCallChat 
                     currentUserId={currentUserId}
-                    targetUserId={callChatUser._id}
-                    targetName={callChatUser.firstName}
+                    targetUserId={activeCall.id}
+                    targetName={activeCall.name}
                     isInitiator={true}
-                    onClose={() => {
-                        setShowCallChat(false);
-                        setCallChatUser(null);
-                    }}
+                    onClose={() => setActiveCall(null)}
                 />
             )}
         </div>

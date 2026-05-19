@@ -1,833 +1,535 @@
-// // import React, { useState, useEffect } from 'react';
-// // import io from 'socket.io-client';
-// // import { useAuth } from '../context/AuthContext';
-// // import VideoCallChat from './VideoCallChat';
-
-// // const PanditUnifiedDashboard = () => {
-// //     const { user } = useAuth();
-// //     const [socket, setSocket] = useState(null);
-// //     const [connected, setConnected] = useState(false);
-// //     const [notifications, setNotifications] = useState([]);
-// //     const [activeChat, setActiveChat] = useState(null);
-// //     const [messages, setMessages] = useState([]);
-// //     const [newMessage, setNewMessage] = useState('');
-// //     const [showVoiceCall, setShowVoiceCall] = useState(false);
-// //     const [callerInfo, setCallerInfo] = useState(null);
-    
-// //     const panditId = user?.phone || '8888888888';
-// //     const messagesEndRef = React.useRef(null);
-
-// //     useEffect(() => {
-// //         const s = io('http://localhost:5000');
-//         // setSocket(s);
-        
-// //         s.on('connect', () => {
-// //             setConnected(true);
-// //             s.emit('user-join', String(panditId));
-// //             console.log('✅ Pandit Online:', panditId);
-// //         });
-
-// //         // 🔔 INCOMING CALL - यह EVENT सबसे महत्वपूर्ण है
-// //         s.on('incoming-call', (data) => {
-// //             console.log('🔔🔔🔔 INCOMING CALL RECEIVED!');
-// //             console.log('📞 From:', data.from);
-            
-// //             // Add notification
-// //             const newNotif = {
-// //                 id: Date.now(),
-// //                 type: 'call',
-// //                 msg: `📞 INCOMING CALL from User ${data.from?.slice(-6)}`,
-// //                 data: data
-// //             };
-// //             setNotifications(prev => [newNotif, ...prev]);
-            
-// //             // Browser Notification
-// //             if (Notification.permission === 'granted') {
-// //                 new Notification('📞 Incoming Call!', {
-// //                     body: `User ${data.from?.slice(-6)} is calling you`,
-// //                 });
-// //             }
-            
-// //             // Alert for immediate testing
-// //             alert(`📞 INCOMING CALL from User ${data.from?.slice(-6)}!`);
-// //         });
-
-// //         // 💬 Incoming Chat Message
-// //         s.on('private-message', (data) => {
-// //             console.log('💬 New message:', data);
-// //             setNotifications(prev => [{
-// //                 id: Date.now(),
-// //                 type: 'chat',
-// //                 msg: `💬 New message from User ${data.from?.slice(-6)}: ${data.message.substring(0, 30)}`,
-// //                 data: data
-// //             }, ...prev]);
-            
-// //             if (activeChat === data.from) {
-// //                 setMessages(prev => [...prev, data]);
-// //                 setTimeout(() => {
-// //                     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-// //                 }, 100);
-// //             }
-// //         });
-
-// //         // Request notification permission
-// //         if (Notification.permission === 'default') {
-// //             Notification.requestPermission();
-// //         }
-
-// //         return () => s.close();
-// //     }, [panditId, activeChat]);
-
-// //     const acceptCall = (notif) => {
-// //         console.log('✅ Accepting call from:', notif.data.from);
-// //         // Open voice call window
-// //         setCallerInfo({
-// //             id: notif.data.from,
-// //             name: `User ${notif.data.from?.slice(-6)}`,
-// //             signal: notif.data.signal
-// //         });
-// //         setShowVoiceCall(true);
-// //         setNotifications(prev => prev.filter(n => n.id !== notif.id));
-        
-// //         if (socket) {
-// //             socket.emit('answer-call', { to: notif.data.from, signal: 'accepted' });
-// //         }
-// //     };
-
-// //     const declineCall = (notif) => {
-// //         console.log('❌ Declining call from:', notif.data.from);
-// //         if (socket) {
-// //             socket.emit('end-call', { to: notif.data.from });
-// //         }
-// //         setNotifications(prev => prev.filter(n => n.id !== notif.id));
-// //     };
-
-// //     const openChat = (notif) => {
-// //         setActiveChat(notif.data.from);
-// //         loadMessages(notif.data.from);
-// //         setNotifications(prev => prev.filter(n => n.id !== notif.id));
-// //     };
-
-// //     const loadMessages = async (userId) => {
-// //         try {
-// //             const res = await fetch(`http://localhost:5000/api/chat/messages/${panditId}/${userId}`);
-// //             const data = await res.json();
-// //             if (data.success) setMessages(data.data);
-// //         } catch (err) {
-// //             console.error(err);
-// //         }
-// //     };
-
-// //     const sendMessage = () => {
-// //         if (!newMessage.trim() || !activeChat) return;
-// //         if (!socket || !socket.connected) return;
-        
-// //         socket.emit('private-message', {
-// //             to: activeChat,
-// //             from: panditId,
-// //             message: newMessage
-// //         });
-        
-// //         setMessages(prev => [...prev, { 
-// //             from: panditId, 
-// //             message: newMessage, 
-// //             time: new Date(),
-// //             createdAt: new Date()
-// //         }]);
-// //         setNewMessage('');
-        
-// //         setTimeout(() => {
-// //             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-// //         }, 100);
-// //     };
-
-// //     const removeNotif = (id) => {
-// //         setNotifications(prev => prev.filter(n => n.id !== id));
-// //     };
-
-// //     const closeChat = () => {
-// //         setActiveChat(null);
-// //         setMessages([]);
-// //     };
-
-// //     return (
-// //         <div style={{ minHeight: '100vh', background: '#1a1a1a', padding: '20px', marginTop: '70px', color: 'white' }}>
-// //             <h1>🎯 Pandit Dashboard</h1>
-// //             <p>Status: {connected ? '🟢 ONLINE' : '🔴 OFFLINE'} | ID: {panditId}</p>
-            
-// //             {/* Notifications Panel - RIGHT SIDE */}
-// //             <div style={{
-// //                 position: 'fixed', top: '80px', right: '20px', width: '350px', zIndex: 1000
-// //             }}>
-// //                 {notifications.map(notif => (
-// //                     <div key={notif.id} style={{
-// //                         background: notif.type === 'call' ? '#ff9800' : '#2196f3',
-// //                         marginBottom: '10px', padding: '15px', borderRadius: '10px',
-// //                         boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-// //                     }}>
-// //                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-// //                             <p style={{ margin: 0, fontWeight: 'bold', flex: 1 }}>{notif.msg}</p>
-// //                             <button onClick={() => removeNotif(notif.id)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '18px', cursor: 'pointer' }}>×</button>
-// //                         </div>
-// //                         <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
-// //                             {notif.type === 'call' ? (
-// //                                 <>
-// //                                     <button onClick={() => acceptCall(notif)} style={{ background: '#4CAF50', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Accept</button>
-// //                                     <button onClick={() => declineCall(notif)} style={{ background: '#f44336', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Decline</button>
-// //                                 </>
-// //                             ) : (
-// //                                 <button onClick={() => openChat(notif)} style={{ background: '#4CAF50', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Reply</button>
-// //                             )}
-// //                         </div>
-// //                     </div>
-// //                 ))}
-// //             </div>
-            
-// //             {/* Chat Window - BOTTOM RIGHT */}
-// //             {activeChat && !showVoiceCall && (
-// //                 <div style={{
-// //                     position: 'fixed', bottom: '20px', right: '20px', width: '380px', height: '500px',
-// //                     background: '#fff', borderRadius: '10px', display: 'flex', flexDirection: 'column', zIndex: 999,
-// //                     boxShadow: '0 0 10px rgba(0,0,0,0.3)', overflow: 'hidden'
-// //                 }}>
-// //                     <div style={{ background: '#075E54', color: 'white', padding: '12px', display: 'flex', justifyContent: 'space-between' }}>
-// //                         <span>💬 Chat with User {activeChat.slice(-6)}</span>
-// //                         <button onClick={closeChat} style={{ background: 'none', border: 'none', color: 'white', fontSize: '20px', cursor: 'pointer' }}>×</button>
-// //                     </div>
-// //                     <div style={{ flex: 1, overflow: 'auto', padding: '10px', background: '#f0f2f5' }}>
-// //                         {messages.map((msg, i) => (
-// //                             <div key={i} style={{ textAlign: msg.from === panditId ? 'right' : 'left', marginBottom: '10px' }}>
-// //                                 <span style={{
-// //                                     background: msg.from === panditId ? '#DCF8C6' : '#fff',
-// //                                     padding: '8px 12px', borderRadius: '15px', display: 'inline-block', color: '#000'
-// //                                 }}>
-// //                                     {msg.message}
-// //                                 </span>
-// //                                 <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>
-// //                                     {new Date(msg.createdAt || msg.time).toLocaleTimeString()}
-// //                                 </div>
-// //                             </div>
-// //                         ))}
-// //                         <div ref={messagesEndRef} />
-// //                     </div>
-// //                     <div style={{ padding: '10px', display: 'flex', gap: '10px', background: '#fff', borderTop: '1px solid #ddd' }}>
-// //                         <input 
-// //                             type="text" 
-// //                             value={newMessage} 
-// //                             onChange={e => setNewMessage(e.target.value)} 
-// //                             onKeyPress={e => e.key === 'Enter' && sendMessage()} 
-// //                             style={{ 
-// //                                 flex: 1, 
-// //                                 padding: '10px', 
-// //                                 borderRadius: '25px', 
-// //                                 border: '1px solid #ddd', 
-// //                                 outline: 'none',
-// //                                 backgroundColor: '#fff',
-// //                                 color: '#000',
-// //                                 fontSize: '14px'
-// //                             }} 
-// //                             placeholder="Type a message..." 
-// //                         />
-// //                         <button onClick={sendMessage} style={{ background: '#075E54', border: 'none', padding: '10px 20px', borderRadius: '25px', cursor: 'pointer', color: 'white' }}>Send</button>
-// //                     </div>
-// //                 </div>
-// //             )}
-            
-// //             {/* Voice Call Window */}
-// //             {showVoiceCall && callerInfo && (
-// //                 <VideoCallChat
-// //                     currentUserId={panditId}
-// //                     targetUserId={callerInfo.id}
-// //                     targetName={callerInfo.name}
-// //                     isInitiator={false}
-// //                     onClose={() => {
-// //                         setShowVoiceCall(false);
-// //                         setCallerInfo(null);
-// //                     }}
-// //                 />
-// //             )}
-
-// //             {/* Empty State */}
-// //             {notifications.length === 0 && !activeChat && !showVoiceCall && (
-// //                 <div style={{ background: '#2d2d2d', borderRadius: '15px', padding: '60px', textAlign: 'center', marginTop: '20px' }}>
-// //                     <div style={{ fontSize: '60px', marginBottom: '20px' }}>📞💬</div>
-// //                     <h2>No notifications yet</h2>
-// //                     <p style={{ color: '#888' }}>When someone messages or calls you, it will appear here</p>
-// //                 </div>
-// //             )}
-// //         </div>
-// //     );
-// // };
-
-// // export default PanditUnifiedDashboard;
-
-
-// import React, { useState, useEffect } from 'react';
-// import io from 'socket.io-client';
-// import { useAuth } from '../context/AuthContext';
-// import VideoCallChat from './VideoCallChat';
-
-// const PanditUnifiedDashboard = () => {
-//     const { user } = useAuth();
-//     const [socket, setSocket] = useState(null);
-//     const [connected, setConnected] = useState(false);
-//     const [notifications, setNotifications] = useState([]);
-//     const [activeChat, setActiveChat] = useState(null);
-//     const [messages, setMessages] = useState([]);
-//     const [newMessage, setNewMessage] = useState('');
-//     const [showVoiceCall, setShowVoiceCall] = useState(false);
-//     const [callerInfo, setCallerInfo] = useState(null);
-    
-//     const panditId = user?.phone || '8888888888';
-//     const messagesEndRef = React.useRef(null);
-
-//     useEffect(() => {
-//         const s = io('https://astrologer-backendcoll-chaat.onrender.com');
-//         setSocket(s);
-        
-//         s.on('connect', () => {
-//             setConnected(true);
-//             s.emit('user-join', String(panditId));
-//             console.log('✅ Pandit Online:', panditId);
-//         });
-
-//         // 🔔 INCOMING CALL
-//         s.on('incoming-call', (data) => {
-//             console.log('🔔🔔🔔 INCOMING CALL RECEIVED!');
-//             console.log('📞 From:', data.from);
-            
-//             const newNotif = {
-//                 id: Date.now(),
-//                 type: 'call',
-//                 msg: `📞 INCOMING CALL from User ${data.from?.slice(-6)}`,
-//                 data: data
-//             };
-//             setNotifications(prev => [newNotif, ...prev]);
-            
-//             if (Notification.permission === 'granted') {
-//                 new Notification('📞 Incoming Call!', {
-//                     body: `User ${data.from?.slice(-6)} is calling you`,
-//                 });
-//             }
-//         });
-
-//         // 💬 Incoming Chat Message
-//         s.on('private-message', (data) => {
-//             console.log('💬 New message:', data);
-//             setNotifications(prev => [{
-//                 id: Date.now(),
-//                 type: 'chat',
-//                 msg: `💬 New message from User ${data.from?.slice(-6)}: ${data.message.substring(0, 30)}`,
-//                 data: data
-//             }, ...prev]);
-            
-//             if (activeChat === data.from) {
-//                 setMessages(prev => [...prev, data]);
-//                 setTimeout(() => {
-//                     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-//                 }, 100);
-//             }
-//         });
-
-//         if (Notification.permission === 'default') {
-//             Notification.requestPermission();
-//         }
-
-//         return () => s.close();
-//     }, [panditId, activeChat]);
-
-//     // ✅ FIXED: Accept call - DON'T send 'accepted' string
-//     // const acceptCall = (notif) => {
-//     //     console.log('✅ Accepting call from:', notif.data.from);
-//     //     setCallerInfo({
-//     //         id: notif.data.from,
-//     //         name: `User ${notif.data.from?.slice(-6)}`,
-//     //         signal: notif.data.signal
-//     //     });
-//     //     setShowVoiceCall(true);
-//     //     setNotifications(prev => prev.filter(n => n.id !== notif.id));
-//     //     // VideoCallChat will handle the answer-call event
-//     // };
-
-//     const acceptCall = (notif) => {
-//     console.log('✅ Accepting call from:', notif.data.from);
-    
-//     // ✅ CRITICAL: Send answer-call event to backend
-//     if (socket) {
-//         socket.emit('answer-call', { 
-//             to: notif.data.from, 
-//             signal: 'accepted' 
-//         });
-//         console.log('📤 answer-call emitted to:', notif.data.from);
-//     }
-    
-//     // Open voice call window
-//     setCallerInfo({
-//         id: notif.data.from,
-//         name: `User ${notif.data.from?.slice(-6)}`,
-//         signal: notif.data.signal
-//     });
-//     setShowVoiceCall(true);
-//     setNotifications(prev => prev.filter(n => n.id !== notif.id));
-// };
-
-//     const declineCall = (notif) => {
-//         console.log('❌ Declining call from:', notif.data.from);
-//         if (socket) {
-//             socket.emit('end-call', { to: notif.data.from });
-//         }
-//         setNotifications(prev => prev.filter(n => n.id !== notif.id));
-//     };
-
-//     const openChat = (notif) => {
-//         setActiveChat(notif.data.from);
-//         loadMessages(notif.data.from);
-//         setNotifications(prev => prev.filter(n => n.id !== notif.id));
-//     };
-
-//     const loadMessages = async (userId) => {
-//         try {
-//             const res = await fetch(`https://astrologer-backendcoll-chaat.onrender.com/api/chat/messages/${panditId}/${userId}`);
-//             const data = await res.json();
-//             if (data.success) setMessages(data.data);
-//         } catch (err) {
-//             console.error(err);
-//         }
-//     };
-
-//     const sendMessage = () => {
-//         if (!newMessage.trim() || !activeChat) return;
-//         if (!socket || !socket.connected) return;
-        
-//         socket.emit('private-message', {
-//             to: activeChat,
-//             from: panditId,
-//             message: newMessage
-//         });
-        
-//         setMessages(prev => [...prev, { 
-//             from: panditId, 
-//             message: newMessage, 
-//             time: new Date(),
-//             createdAt: new Date()
-//         }]);
-//         setNewMessage('');
-        
-//         setTimeout(() => {
-//             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-//         }, 100);
-//     };
-
-//     const removeNotif = (id) => {
-//         setNotifications(prev => prev.filter(n => n.id !== id));
-//     };
-
-//     const closeChat = () => {
-//         setActiveChat(null);
-//         setMessages([]);
-//     };
-
-//     return (
-//         <div style={{ minHeight: '100vh', background: '#1a1a1a', padding: '20px', marginTop: '70px', color: 'white' }}>
-//             <h1>🎯 Pandit Dashboard</h1>
-//             <p>Status: {connected ? '🟢 ONLINE' : '🔴 OFFLINE'} | ID: {panditId}</p>
-            
-//             {/* Notifications Panel - RIGHT SIDE */}
-//             <div style={{
-//                 position: 'fixed', top: '80px', right: '20px', width: '350px', zIndex: 1000
-//             }}>
-//                 {notifications.map(notif => (
-//                     <div key={notif.id} style={{
-//                         background: notif.type === 'call' ? '#ff9800' : '#2196f3',
-//                         marginBottom: '10px', padding: '15px', borderRadius: '10px',
-//                         boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-//                     }}>
-//                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-//                             <p style={{ margin: 0, fontWeight: 'bold', flex: 1 }}>{notif.msg}</p>
-//                             <button onClick={() => removeNotif(notif.id)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '18px', cursor: 'pointer' }}>×</button>
-//                         </div>
-//                         <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
-//                             {notif.type === 'call' ? (
-//                                 <>
-//                                     <button onClick={() => acceptCall(notif)} style={{ background: '#4CAF50', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Accept</button>
-//                                     <button onClick={() => declineCall(notif)} style={{ background: '#f44336', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Decline</button>
-//                                 </>
-//                             ) : (
-//                                 <button onClick={() => openChat(notif)} style={{ background: '#4CAF50', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Reply</button>
-//                             )}
-//                         </div>
-//                     </div>
-//                 ))}
-//             </div>
-            
-//             {/* Chat Window - BOTTOM RIGHT */}
-//             {activeChat && !showVoiceCall && (
-//                 <div style={{
-//                     position: 'fixed', bottom: '20px', right: '20px', width: '380px', height: '500px',
-//                     background: '#fff', borderRadius: '10px', display: 'flex', flexDirection: 'column', zIndex: 999,
-//                     boxShadow: '0 0 10px rgba(0,0,0,0.3)', overflow: 'hidden'
-//                 }}>
-//                     <div style={{ background: '#075E54', color: 'white', padding: '12px', display: 'flex', justifyContent: 'space-between' }}>
-//                         <span>💬 Chat with User {activeChat.slice(-6)}</span>
-//                         <button onClick={closeChat} style={{ background: 'none', border: 'none', color: 'white', fontSize: '20px', cursor: 'pointer' }}>×</button>
-//                     </div>
-//                     <div style={{ flex: 1, overflow: 'auto', padding: '10px', background: '#f0f2f5' }}>
-//                         {messages.map((msg, i) => (
-//                             <div key={i} style={{ textAlign: msg.from === panditId ? 'right' : 'left', marginBottom: '10px' }}>
-//                                 <span style={{
-//                                     background: msg.from === panditId ? '#DCF8C6' : '#fff',
-//                                     padding: '8px 12px', borderRadius: '15px', display: 'inline-block', color: '#000'
-//                                 }}>
-//                                     {msg.message}
-//                                 </span>
-//                                 <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>
-//                                     {new Date(msg.createdAt || msg.time).toLocaleTimeString()}
-//                                 </div>
-//                             </div>
-//                         ))}
-//                         <div ref={messagesEndRef} />
-//                     </div>
-//                     <div style={{ padding: '10px', display: 'flex', gap: '10px', background: '#fff', borderTop: '1px solid #ddd' }}>
-//                         <input 
-//                             type="text" 
-//                             value={newMessage} 
-//                             onChange={e => setNewMessage(e.target.value)} 
-//                             onKeyPress={e => e.key === 'Enter' && sendMessage()} 
-//                             style={{ 
-//                                 flex: 1, 
-//                                 padding: '10px', 
-//                                 borderRadius: '25px', 
-//                                 border: '1px solid #ddd', 
-//                                 outline: 'none',
-//                                 backgroundColor: '#fff',
-//                                 color: '#000',
-//                                 fontSize: '14px'
-//                             }} 
-//                             placeholder="Type a message..." 
-//                         />
-//                         <button onClick={sendMessage} style={{ background: '#075E54', border: 'none', padding: '10px 20px', borderRadius: '25px', cursor: 'pointer', color: 'white' }}>Send</button>
-//                     </div>
-//                 </div>
-//             )}
-            
-//             {/* Voice Call Window */}
-//             {showVoiceCall && callerInfo && (
-//                 <VideoCallChat
-//                     currentUserId={panditId}
-//                     targetUserId={callerInfo.id}
-//                     targetName={callerInfo.name}
-//                     isInitiator={false}
-//                     onClose={() => {
-//                         setShowVoiceCall(false);
-//                         setCallerInfo(null);
-//                     }}
-//                 />
-//             )}
-
-//             {/* Empty State */}
-//             {notifications.length === 0 && !activeChat && !showVoiceCall && (
-//                 <div style={{ background: '#2d2d2d', borderRadius: '15px', padding: '60px', textAlign: 'center', marginTop: '20px' }}>
-//                     <div style={{ fontSize: '60px', marginBottom: '20px' }}>📞💬</div>
-//                     <h2>No notifications yet</h2>
-//                     <p style={{ color: '#888' }}>When someone messages or calls you, it will appear here</p>
-//                 </div>
-//             )}
-//         </div>
-//     );
-// };
-
-// export default PanditUnifiedDashboard;
-
-import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '../supabaseClient';
 import VideoCallChat from './VideoCallChat';
 
-const PanditUnifiedDashboard = () => {
-    const { user } = useAuth();
-    const [socket, setSocket] = useState(null);
-    const [connected, setConnected] = useState(false);
-    const [notifications, setNotifications] = useState([]);
-    const [activeChat, setActiveChat] = useState(null);
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
-    const [showVoiceCall, setShowVoiceCall] = useState(false);
-    const [callerInfo, setCallerInfo] = useState(null);
+const PanditUnifiedDashboard = ({ currentPanditId = '8888888801' }) => {
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [activeCall, setActiveCall] = useState(null);
+  const [incomingCall, setIncomingCall] = useState(null);
+  const [typingUsers, setTypingUsers] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState(null);
+  
+  const messagesEndRef = useRef(null);
+  const channelRef = useRef(null);
+
+  // Show toast notification
+  const showNotification = (msg, type = 'info') => {
+    setNotification({ msg, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  // Fetch online users from profiles table (better than unified_interactions)
+  const fetchOnlineUsers = async () => {
+    try {
+      console.log('Fetching online users for pandit:', currentPanditId);
+      
+      // Get online users from profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('is_online', true)
+        .eq('role', 'user')
+        .neq('id', currentPanditId);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        setOnlineUsers([]);
+        return;
+      }
+
+      console.log('Online users fetched:', data);
+
+      if (data && data.length > 0) {
+        const formattedUsers = data.map(user => ({
+          id: user.id,
+          sender_id: user.id,
+          name: user.full_name,
+          phone: user.phone,
+          is_active: true
+        }));
+        setOnlineUsers(formattedUsers);
+      } else {
+        setOnlineUsers([]);
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setOnlineUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load chat messages
+  const loadMessages = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('unified_interactions')
+        .select('*')
+        .eq('action_type', 'message')
+        .or(`and(sender_id.eq.${currentPanditId},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${currentPanditId})`)
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        console.error('Error loading messages:', error);
+        return;
+      }
+      
+      if (data) setMessages(data);
+    } catch (err) {
+      console.error('Load messages error:', err);
+    }
+  };
+
+  // Send message
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedUser) return;
     
-    const panditId = user?.phone || '8888888888';
-    const messagesEndRef = React.useRef(null);
-
-    useEffect(() => {
-        const s = io('https://astrologer-backendcoll-chaat.onrender.com');
-        setSocket(s);
-        
-        s.on('connect', () => {
-            setConnected(true);
-            s.emit('user-join', String(panditId));
-            console.log('✅ Pandit Online:', panditId);
-        });
-
-        // 🔔 INCOMING CALL
-        s.on('incoming-call', (data) => {
-            console.log('🔔🔔🔔 INCOMING CALL RECEIVED!');
-            console.log('📞 From:', data.from);
-            console.log('📞 Signal data:', data.signal);
-            
-            const newNotif = {
-                id: Date.now(),
-                type: 'call',
-                msg: `📞 INCOMING CALL from User ${data.from?.slice(-6)}`,
-                data: data
-            };
-            setNotifications(prev => [newNotif, ...prev]);
-            
-            // Play sound effect
-            try {
-                const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
-                audio.play().catch(e => console.log('Audio play error:', e));
-            } catch(e) {}
-            
-            // Browser notification
-            if (Notification.permission === 'granted') {
-                new Notification('📞 Incoming Call!', {
-                    body: `User ${data.from?.slice(-6)} is calling you`,
-                });
-            }
-            
-            // Alert for testing
-            alert(`📞 INCOMING CALL from User ${data.from?.slice(-6)}!`);
-        });
-
-        // 💬 Incoming Chat Message
-        s.on('private-message', (data) => {
-            console.log('💬 New message:', data);
-            setNotifications(prev => [{
-                id: Date.now(),
-                type: 'chat',
-                msg: `💬 New message from User ${data.from?.slice(-6)}: ${data.message.substring(0, 30)}`,
-                data: data
-            }, ...prev]);
-            
-            if (activeChat === data.from) {
-                setMessages(prev => [...prev, data]);
-                setTimeout(() => {
-                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-            }
-        });
-
-        if (Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-
-        return () => s.close();
-    }, [panditId, activeChat]);
-
-    // ✅ FIXED: Accept call - DON'T send anything, let VideoCallChat handle it
-    const acceptCall = (notif) => {
-        console.log('✅ Accepting call from:', notif.data.from);
-        
-        // ⚠️ IMPORTANT: Don't emit answer-call here!
-        // VideoCallChat component will handle the WebRTC answer
-        // Just open the call window with the signal data
-        
-        setCallerInfo({
-            id: notif.data.from,
-            name: `User ${notif.data.from?.slice(-6)}`,
-            signal: notif.data.signal  // Pass the offer signal to VideoCallChat
-        });
-        setShowVoiceCall(true);
-        setNotifications(prev => prev.filter(n => n.id !== notif.id));
+    const messageData = {
+      sender_id: currentPanditId,
+      receiver_id: selectedUser.sender_id,
+      action_type: 'message',
+      content: newMessage,
+      is_read: false,
+      created_at: new Date().toISOString()
     };
-
-    const declineCall = (notif) => {
-        console.log('❌ Declining call from:', notif.data.from);
-        if (socket) {
-            socket.emit('end-call', { to: notif.data.from });
-            socket.emit('call-declined', { to: notif.data.from });
-        }
-        setNotifications(prev => prev.filter(n => n.id !== notif.id));
-    };
-
-    const openChat = (notif) => {
-        setActiveChat(notif.data.from);
-        loadMessages(notif.data.from);
-        setNotifications(prev => prev.filter(n => n.id !== notif.id));
-    };
-
-    const loadMessages = async (userId) => {
-        try {
-            const res = await fetch(`https://astrologer-backendcoll-chaat.onrender.com/api/chat/messages/${panditId}/${userId}`);
-            const data = await res.json();
-            if (data.success) setMessages(data.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const sendMessage = () => {
-        if (!newMessage.trim() || !activeChat) return;
-        if (!socket || !socket.connected) return;
-        
-        socket.emit('private-message', {
-            to: activeChat,
-            from: panditId,
-            message: newMessage
-        });
-        
-        setMessages(prev => [...prev, { 
-            from: panditId, 
-            message: newMessage, 
-            time: new Date(),
-            createdAt: new Date()
-        }]);
+    
+    try {
+      const { error } = await supabase.from('unified_interactions').insert([messageData]);
+      if (!error) {
+        setMessages(prev => [...prev, messageData]);
         setNewMessage('');
-        
-        setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
+        showNotification('Message sent!', 'success');
+      } else {
+        console.error('Send message error:', error);
+      }
+    } catch (err) {
+      console.error('Send error:', err);
+    }
+  };
 
-    const removeNotif = (id) => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
-    };
+  // Update pandit online status
+  const updateOnlineStatus = async (isOnline) => {
+    try {
+      // Update profiles table
+      await supabase
+        .from('profiles')
+        .update({ is_online: isOnline, last_seen: new Date().toISOString() })
+        .eq('id', currentPanditId);
+      
+      // Update unified_interactions
+      await supabase
+        .from('unified_interactions')
+        .upsert({
+          sender_id: currentPanditId,
+          action_type: 'online',
+          is_active: isOnline,
+          updated_at: new Date().toISOString()
+        });
+    } catch (err) {
+      console.error('Status update error:', err);
+    }
+  };
 
-    const closeChat = () => {
-        setActiveChat(null);
-        setMessages([]);
-    };
+  // Handle typing indicator
+  const handleTyping = async (isTyping) => {
+    if (!selectedUser) return;
+    
+    if (channelRef.current) {
+      channelRef.current.httpSend({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { sender: currentPanditId, isTyping }
+      });
+    }
+  };
 
+  // Setup realtime subscriptions
+  useEffect(() => {
+    if (!currentPanditId) return;
+    
+    // Set pandit online
+    updateOnlineStatus(true);
+    
+    // Fetch initial online users
+    fetchOnlineUsers();
+    
+    // Subscribe to realtime changes
+    const channel = supabase.channel('pandit-dashboard');
+    channelRef.current = channel;
+    
+    // Listen for new messages
+    channel
+      .on('postgres_changes', 
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'unified_interactions'
+        },
+        (payload) => {
+          const data = payload.new;
+          console.log('New interaction:', data);
+          
+          // Handle new message (both sent and received)
+          if (data.action_type === 'message') {
+            // If message is for current pandit
+            if (data.receiver_id === currentPanditId) {
+              showNotification(`📩 New message from User_${data.sender_id.slice(-6)}`, 'message');
+              
+              // If chat is open with this user, add to messages
+              if (selectedUser && data.sender_id === selectedUser.sender_id) {
+                setMessages(prev => [...prev, data]);
+              }
+              
+              // Mark as read
+              supabase.from('unified_interactions')
+                .update({ is_read: true })
+                .eq('id', data.id);
+            }
+            
+            // If message is from current pandit (sent by us)
+            if (data.sender_id === currentPanditId && selectedUser && data.receiver_id === selectedUser.sender_id) {
+              setMessages(prev => [...prev, data]);
+            }
+          }
+          
+          // Handle call signal (incoming)
+          if (data.action_type === 'call_signal' && data.receiver_id === currentPanditId) {
+            console.log("📞 INCOMING CALL:", data);
+            showNotification(`📞 Incoming call from User_${data.sender_id.slice(-6)}`, 'call');
+            setIncomingCall({
+              from_user: data.sender_id,
+              name: `User_${data.sender_id.slice(-6)}`,
+              signal: data.payload?.signal,
+              call_id: data.id
+            });
+          }
+          
+          // Handle call answer
+          // Incoming call signal handler - change action_type to 'call_offer'
+if (data.action_type === 'call_offer' && data.receiver_id === currentPanditId) {
+    console.log('📞 INCOMING CALL from:', data.sender_id);
+    showNotification(`📞 Incoming call from ${data.sender_id.slice(-6)}`, 'call');
+    setIncomingCall({
+        from_user: data.sender_id,
+        name: `User_${data.sender_id.slice(-6)}`,
+        offer: data.payload?.offer,
+        call_id: data.id
+    });
+}
+        }
+      )
+      .on('postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `is_online=eq.true`
+        },
+        () => {
+          // Refresh online users when status changes
+          fetchOnlineUsers();
+        }
+      )
+      // Listen for broadcast events (typing)
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (payload.sender !== currentPanditId && payload.sender === selectedUser?.sender_id) {
+          setTypingUsers(prev => ({ ...prev, [payload.sender]: payload.isTyping }));
+          setTimeout(() => {
+            setTypingUsers(prev => ({ ...prev, [payload.sender]: false }));
+          }, 2000);
+        }
+      })
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
+    
+    // Refresh online users every 10 seconds
+    const interval = setInterval(fetchOnlineUsers, 10000);
+    
+    return () => {
+      updateOnlineStatus(false);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+      clearInterval(interval);
+    };
+  }, [currentPanditId]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Handle typing input
+  const handleMessageChange = (e) => {
+    setNewMessage(e.target.value);
+    handleTyping(e.target.value.length > 0);
+    
+    // Clear typing after 2 seconds of no input
+    if (window.typingTimeout) clearTimeout(window.typingTimeout);
+    window.typingTimeout = setTimeout(() => {
+      handleTyping(false);
+    }, 2000);
+  };
+
+  // Initiate call
+  const initiateCall = async (user) => {
+    try {
+      setActiveCall({
+        id: user.sender_id,
+        name: user.name || `User_${user.sender_id.slice(-4)}`,
+        isInitiator: true
+      });
+      
+      // Send call signal with proper offer structure
+      const callPayload = {
+        caller_name: `Pandit_${currentPanditId.slice(-4)}`,
+        status: 'ringing',
+        type: 'offer',
+        signal: null // Will be set by VideoCallChat component
+      };
+      
+      const { error } = await supabase.from('unified_interactions').insert([{
+        sender_id: currentPanditId,
+        receiver_id: user.sender_id,
+        action_type: 'call_signal',
+        payload: callPayload
+      }]);
+      
+      if (error) console.error('Call signal error:', error);
+    } catch (err) {
+      console.error('Initiate call error:', err);
+    }
+  };
+
+  // Accept call
+  const acceptCall = () => {
+    setActiveCall({
+        id: incomingCall.from_user,
+        name: incomingCall.name,
+        isInitiator: false,
+        incomingOffer: incomingCall.offer
+    });
+    setIncomingCall(null);
+};
+
+  // Decline call
+  const declineCall = async () => {
+    if (incomingCall) {
+      await supabase.from('unified_interactions')
+        .update({ is_active: false })
+        .eq('id', incomingCall.call_id);
+      setIncomingCall(null);
+      showNotification('Call declined', 'info');
+    }
+  };
+
+  if (loading) {
     return (
-        <div style={{ minHeight: '100vh', background: '#1a1a1a', padding: '20px', marginTop: '70px', color: 'white' }}>
-            <h1>🎯 Pandit Dashboard</h1>
-            <p>Status: {connected ? '🟢 ONLINE' : '🔴 OFFLINE'} | ID: {panditId}</p>
-            
-            {/* Debug info */}
-            <div style={{ background: '#2d2d2d', padding: '10px', borderRadius: '8px', marginBottom: '20px', fontSize: '12px' }}>
-                <div>📡 Socket Status: {socket?.connected ? 'Connected' : 'Disconnected'}</div>
-                <div>🔔 Listening for incoming-call events...</div>
-            </div>
-            
-            {/* Notifications Panel - RIGHT SIDE */}
-            <div style={{
-                position: 'fixed', top: '80px', right: '20px', width: '350px', zIndex: 1000
-            }}>
-                {notifications.map(notif => (
-                    <div key={notif.id} style={{
-                        background: notif.type === 'call' ? '#ff9800' : '#2196f3',
-                        marginBottom: '10px', padding: '15px', borderRadius: '10px',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                        animation: 'slideIn 0.3s ease-out'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <p style={{ margin: 0, fontWeight: 'bold', flex: 1 }}>{notif.msg}</p>
-                            <button onClick={() => removeNotif(notif.id)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '18px', cursor: 'pointer' }}>×</button>
-                        </div>
-                        <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
-                            {notif.type === 'call' ? (
-                                <>
-                                    <button onClick={() => acceptCall(notif)} style={{ background: '#4CAF50', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Accept</button>
-                                    <button onClick={() => declineCall(notif)} style={{ background: '#f44336', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Decline</button>
-                                </>
-                            ) : (
-                                <button onClick={() => openChat(notif)} style={{ background: '#4CAF50', color: 'white', padding: '5px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Reply</button>
-                            )}
-                        </div>
-                    </div>
-                ))}
-            </div>
-            
-            {/* Chat Window - BOTTOM RIGHT */}
-            {activeChat && !showVoiceCall && (
-                <div style={{
-                    position: 'fixed', bottom: '20px', right: '20px', width: '380px', height: '500px',
-                    background: '#fff', borderRadius: '10px', display: 'flex', flexDirection: 'column', zIndex: 999,
-                    boxShadow: '0 0 10px rgba(0,0,0,0.3)', overflow: 'hidden'
-                }}>
-                    <div style={{ background: '#075E54', color: 'white', padding: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                        <span>💬 Chat with User {activeChat.slice(-6)}</span>
-                        <button onClick={closeChat} style={{ background: 'none', border: 'none', color: 'white', fontSize: '20px', cursor: 'pointer' }}>×</button>
-                    </div>
-                    <div style={{ flex: 1, overflow: 'auto', padding: '10px', background: '#f0f2f5' }}>
-                        {messages.map((msg, i) => (
-                            <div key={i} style={{ textAlign: msg.from === panditId ? 'right' : 'left', marginBottom: '10px' }}>
-                                <span style={{
-                                    background: msg.from === panditId ? '#DCF8C6' : '#fff',
-                                    padding: '8px 12px', borderRadius: '15px', display: 'inline-block', color: '#000'
-                                }}>
-                                    {msg.message}
-                                </span>
-                                <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>
-                                    {new Date(msg.createdAt || msg.time).toLocaleTimeString()}
-                                </div>
-                            </div>
-                        ))}
-                        <div ref={messagesEndRef} />
-                    </div>
-                    <div style={{ padding: '10px', display: 'flex', gap: '10px', background: '#fff', borderTop: '1px solid #ddd' }}>
-                        <input 
-                            type="text" 
-                            value={newMessage} 
-                            onChange={e => setNewMessage(e.target.value)} 
-                            onKeyPress={e => e.key === 'Enter' && sendMessage()} 
-                            style={{ 
-                                flex: 1, 
-                                padding: '10px', 
-                                borderRadius: '25px', 
-                                border: '1px solid #ddd', 
-                                outline: 'none',
-                                backgroundColor: '#fff',
-                                color: '#000',
-                                fontSize: '14px'
-                            }} 
-                            placeholder="Type a message..." 
-                        />
-                        <button onClick={sendMessage} style={{ background: '#075E54', border: 'none', padding: '10px 20px', borderRadius: '25px', cursor: 'pointer', color: 'white' }}>Send</button>
-                    </div>
-                </div>
-            )}
-            
-            {/* Voice Call Window */}
-            {showVoiceCall && callerInfo && (
-                <VideoCallChat
-                    currentUserId={panditId}
-                    targetUserId={callerInfo.id}
-                    targetName={callerInfo.name}
-                    isInitiator={false}
-                    incomingSignal={callerInfo.signal}  // Pass the offer signal
-                    onClose={() => {
-                        setShowVoiceCall(false);
-                        setCallerInfo(null);
-                    }}
-                />
-            )}
-
-            {/* Empty State */}
-            {notifications.length === 0 && !activeChat && !showVoiceCall && (
-                <div style={{ background: '#2d2d2d', borderRadius: '15px', padding: '60px', textAlign: 'center', marginTop: '20px' }}>
-                    <div style={{ fontSize: '60px', marginBottom: '20px' }}>📞💬</div>
-                    <h2>No notifications yet</h2>
-                    <p style={{ color: '#888' }}>When someone messages or calls you, it will appear here</p>
-                    <p style={{ color: '#666', fontSize: '12px', marginTop: '10px' }}>
-                        Make sure: Socket is 🟢 ONLINE
-                    </p>
-                </div>
-            )}
-            
-            <style>{`
-                @keyframes slideIn {
-                    from {
-                        transform: translateX(100%);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateX(0);
-                        opacity: 1;
-                    }
-                }
-            `}</style>
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <div className="text-center text-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          Loading dashboard...
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-900">
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`fixed top-20 right-5 z-50 px-4 py-2 rounded-lg shadow-lg animate-bounce ${
+          notification.type === 'message' ? 'bg-blue-500' :
+          notification.type === 'call' ? 'bg-green-500' :
+          notification.type === 'success' ? 'bg-green-500' : 'bg-gray-700'
+        } text-white`}>
+          {notification.msg}
+        </div>
+      )}
+
+      {/* Left Panel - Online Users */}
+      <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+        <div className="p-4 border-b border-gray-700">
+          <h2 className="text-xl font-bold text-yellow-500">🎯 Pandit Dashboard</h2>
+          <p className="text-sm text-gray-400">ID: {currentPanditId}</p>
+          <p className="text-xs text-green-500 mt-1">🟢 Online</p>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4">
+          <h3 className="text-sm font-semibold text-gray-400 mb-3">
+            Online Users ({onlineUsers.length})
+          </h3>
+          {onlineUsers.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-4">
+              No online users at the moment
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {onlineUsers.map((user) => (
+                <div
+                  key={user.id}
+                  onClick={() => {
+                    setSelectedUser(user);
+                    loadMessages(user.sender_id);
+                  }}
+                  className={`p-3 rounded-lg cursor-pointer transition flex justify-between items-center ${
+                    selectedUser?.sender_id === user.sender_id 
+                      ? 'bg-yellow-500/20 border border-yellow-500' 
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`}
+                >
+                  <div className="flex-1">
+                    <div className="font-medium text-white">
+                      {user.name || `User_${user.sender_id.slice(-6)}`}
+                    </div>
+                    <div className="text-xs text-green-400 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                      Online
+                    </div>
+                    {typingUsers[user.sender_id] && (
+                      <div className="text-xs text-yellow-500 animate-pulse mt-1">
+                        ✏️ Typing...
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      initiateCall(user); 
+                    }}
+                    className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-green-700 transition flex items-center gap-1"
+                  >
+                    📞 Call
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right Panel - Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {selectedUser ? (
+          <>
+            <div className="bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center">
+              <div>
+                <span className="text-white font-semibold text-lg">
+                  Chat with {selectedUser.name || `User_${selectedUser.sender_id.slice(-6)}`}
+                </span>
+                {typingUsers[selectedUser.sender_id] && (
+                  <span className="text-xs text-yellow-500 ml-2 animate-pulse">
+                    typing...
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => initiateCall(selectedUser)}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+              >
+                📞 Call User
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-900">
+              {messages.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  💬 No messages yet
+                  <p className="text-xs mt-2">Start a conversation!</p>
+                </div>
+              ) : (
+                messages.map((msg, idx) => {
+                  const isMe = msg.sender_id === currentPanditId;
+                  return (
+                    <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
+                      <div className={`max-w-[70%] px-4 py-2 rounded-xl ${isMe ? 'bg-yellow-500 text-white rounded-br-none' : 'bg-gray-700 text-white rounded-bl-none'}`}>
+                        <p className="text-sm break-words">{msg.content}</p>
+                        <p className="text-xs opacity-70 mt-1 text-right">
+                          {msg.created_at ? new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                          {isMe && (msg.is_read ? ' ✓✓' : ' ✓')}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            <div className="p-4 bg-gray-800 border-t border-gray-700 flex gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={handleMessageChange}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                className="flex-1 p-3 bg-gray-700 text-white rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-400"
+                placeholder="Type a message..."
+              />
+              <button
+                onClick={sendMessage}
+                disabled={!newMessage.trim()}
+                className="px-6 py-3 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Send
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
+            <div className="text-6xl mb-4">💬</div>
+            <p className="text-lg">Select a user from the left panel</p>
+            <p className="text-sm">to start chatting or make a call</p>
+          </div>
+        )}
+      </div>
+
+      {/* Incoming Call Notification */}
+      {incomingCall && (
+        <div className="fixed top-5 right-5 bg-gradient-to-r from-green-600 to-green-500 text-white p-4 rounded-xl shadow-2xl z-50 min-w-[300px] animate-bounce">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl">
+              📞
+            </div>
+            <div>
+              <h4 className="font-bold">Incoming Call</h4>
+              <p className="text-sm opacity-90">{incomingCall.name} is calling you...</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={acceptCall} 
+              className="flex-1 bg-white text-green-600 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+            >
+              Accept
+            </button>
+            <button 
+              onClick={declineCall} 
+              className="flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+            >
+              Decline
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Active Call */}
+      {activeCall && (
+    <VideoCallChat
+        currentUserId={currentPanditId}
+        targetUserId={activeCall.id}
+        targetName={activeCall.name}
+        isInitiator={activeCall.isInitiator}
+        incomingOffer={activeCall.incomingOffer}
+        onClose={() => setActiveCall(null)}
+    />
+)}
+    </div>
+  );
 };
 
 export default PanditUnifiedDashboard;
