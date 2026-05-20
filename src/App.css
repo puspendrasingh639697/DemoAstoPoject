@@ -4,92 +4,483 @@
   box-sizing: border-box;
 }
 
-.notranslate {
-  unicode-bidi: isolate;
+html {
+  scroll-behavior: smooth;
 }
 
-.transition-transform {
-  transition: transform 0.5s ease-in-out;
+body {
+  font-family: 'Poppins', 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #1f2937;
 }
 
+/* ============================================
+   CUSTOM SCROLLBAR
+============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #f5af19, #f12711);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #e6a00a, #d41f0a);
+}
+
+/* ============================================
+   ANIMATIONS
+============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Animation Classes */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fadeInDown {
+  animation: fadeInDown 0.6s ease-out forwards;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s ease-out forwards;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+.animate-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+.animate-bounce {
+  animation: bounce 0.5s ease-in-out;
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Hover Effects */
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   GLASS MORPHISM
+============================================ */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   GRADIENT TEXT
+============================================ */
+.gradient-text {
+  background: linear-gradient(135deg, #f5af19, #f12711);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============================================
+   BUTTON STYLES
+============================================ */
+.btn-gold {
+  background: linear-gradient(135deg, #f5af19, #f12711);
+  color: white;
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(245, 175, 25, 0.4);
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+.btn-outline-gold {
+  background: transparent;
+  border: 2px solid #f5af19;
+  color: #f5af19;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-gold:hover {
+  background: linear-gradient(135deg, #f5af19, #f12711);
+  color: white;
+  border-color: transparent;
+}
+
+/* ============================================
+   CARD STYLES
+============================================ */
+.card-premium {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.card-premium:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   CHAT STYLES
+============================================ */
+.chat-bubble-sent {
+  background: linear-gradient(135deg, #f5af19, #f12711);
+  color: white;
+  border-radius: 20px 20px 4px 20px;
+}
+
+.chat-bubble-received {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-radius: 20px 20px 20px 4px;
+}
+
+/* ============================================
+   LOADING SHIMMER
+============================================ */
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   RESPONSIVE UTILITIES
+============================================ */
+@media (max-width: 640px) {
+  .hide-on-mobile {
+    display: none;
+  }
+  
+  .full-width-on-mobile {
+    width: 100%;
+  }
+  
+  .stack-on-mobile {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hide-on-tablet {
+    display: none;
+  }
+}
+
+/* ============================================
+   GOOGLE TRANSLATE HIDE
+============================================ */
+.goog-te-banner-frame.skiptranslate,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-te-menu-value {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+font {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body {
+  top: 0px !important;
+}
+
+.goog-te-combo {
+  display: none !important;
+}
+
+/* ============================================
+   NUMBER INPUT SPINNER REMOVE
+============================================ */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input [type="number"] {
+input[type="number"] {
   -webkit-appearance: none;
   -moz-appearance: textfield;
   appearance: none;
 }
 
+/* ============================================
+   SWIPER CUSTOM
+============================================ */
 .swiper-button-prev,
 .swiper-button-next {
-  color: #f8a100 !important;
-  /* Tailwind's yellow-400 */
+  color: #f5af19 !important;
 }
 
-@keyframes slide-up {
-  0% {
-    transform: translateY(100%);
-    opacity: 0;
-  }
+.swiper-pagination-bullet-active {
+  background: #f5af19 !important;
+}
 
-  100% {
-    transform: translateY(0);
-    opacity: 1;
+/* ============================================
+   NOTIFICATION BADGE
+============================================ */
+.notification-badge {
+  position: relative;
+}
+
+.notification-badge::after {
+  content: attr(data-count);
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  animation: pulse 1s infinite;
+}
+
+/* ============================================
+   TYPING INDICATOR
+============================================ */
+.typing-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9ca3af;
+  animation: pulse 1.5s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ============================================
+   ONLINE STATUS INDICATOR
+============================================ */
+.status-online {
+  position: relative;
+}
+
+.status-online::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #10b981;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: pulse 1.5s infinite;
+}
+
+.status-offline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #9ca3af;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* ============================================
+   FOOTER STYLES
+============================================ */
+@media (min-width: 1024px) {
+  .footer-radius {
+    border-radius: 50% 50% 0 0;
   }
 }
 
-.slide-up {
-  animation: slide-up 0.7s ease-out forwards;
+/* ============================================
+   UTILITY CLASSES
+============================================ */
+.notranslate {
+  unicode-bidi: isolate;
 }
 
-@keyframes slide-down {
-  0% {
-    transform: translateY(0);
-  }
-
-  100% {
-    transform: translateY(-100%);
-  }
-}
-
-.slide-down {
-  animation: slide-down 0.7s ease-out forwards;
-  animation-delay: 1000ms;
-}
-
-@keyframes slide-up {
-  0% {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.slide-up {
-  animation: slide-up 0.7s ease-out forwards;
-}
-
-@keyframes slide-down {
-  0% {
-    transform: translateY(0);
-  }
-
-  100% {
-    transform: translateY(-100%);
-  }
-}
-
-.slide-down {
-  animation: slide-down 0.7s ease-out forwards;
-  animation-delay: 1000ms;
+.transition-transform {
+  transition: transform 0.5s ease-in-out;
 }
 
 .scale-in-ver-top {
@@ -104,49 +495,13 @@ input [type="number"] {
     transform-origin: 100% 0%;
     opacity: 1;
   }
-
   100% {
-    -webkit-transform: scaleY(0.5);
-    transform: scaleY(0.5);
+    -webkit-transform: scaleY(1);
+    transform: scaleY(1);
     -webkit-transform-origin: 100% 0%;
     transform-origin: 100% 0%;
     opacity: 1;
   }
-}
-
-.MuiBox-root {
-  overflow-x: hidden !important;
-}
-
-/* block google translate popup */
-
-/* Hide original Google Translate dropdown */
-.goog-te-banner-frame.skiptranslate,
-#goog-gt-tt,
-.goog-te-balloon-frame,
-.goog-te-menu-value {
-  display: none !important;
-  height: 0 !important;
-  width: 0 !important;
-}
-
-/* body *:hover{
-  text-decoration: none !important;
-} */
-
-font {
-  background-color: transparent !important;
-  box-shadow: none !important;
-  /* background-color: none !important; */
-}
-
-body {
-  top: 0px !important;
-}
-
-/* Hide dropdown injected by Google */
-.goog-te-combo {
-  display: none !important;
 }
 
 .scale-in-center {
@@ -158,37 +513,21 @@ body {
     transform: scale(0);
     opacity: 0;
   }
-
   60% {
     transform: scale(1.1);
     opacity: 1;
   }
-
   80% {
     transform: scale(0.98);
   }
-
   100% {
     transform: scale(1);
   }
 }
 
-@-webkit-keyframes scale-in-ver-bottom {
-  0% {
-    -webkit-transform: scaleY(0);
-    transform: scaleY(0);
-    -webkit-transform-origin: 0% 100%;
-    transform-origin: 0% 100%;
-    opacity: 1;
-  }
-
-  100% {
-    -webkit-transform: scaleY(1);
-    transform: scaleY(1);
-    -webkit-transform-origin: 0% 100%;
-    transform-origin: 0% 100%;
-    opacity: 1;
-  }
+.scale-in-ver-bottom {
+  -webkit-animation: scale-in-ver-bottom 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: scale-in-ver-bottom 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
 @keyframes scale-in-ver-bottom {
@@ -199,7 +538,6 @@ body {
     transform-origin: 0% 100%;
     opacity: 1;
   }
-
   100% {
     -webkit-transform: scaleY(1);
     transform: scaleY(1);
@@ -209,44 +547,35 @@ body {
   }
 }
 
-.scale-in-ver-bottom {
-  -webkit-animation: scale-in-ver-bottom 0.5s
-    cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-  animation: scale-in-ver-bottom 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.slide-up {
+  animation: slide-up 0.7s ease-out forwards;
 }
 
-/* globals.css */
-::-webkit-scrollbar {
-  width: 9px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #ebbe08;
-  border-radius: 10px;
-  border: 2px solid #faee41;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #eab308;
-}
-
-/* footer.css */
-
-@media (min-width: 1024px) {
-  .footer-radius {
-    border-radius: 50% 50% 0 0;
+@keyframes slide-up {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-@media (min-width: 1280px) {
-  .footer-radius {
-    border-radius: 50% 50% 0 0;
+.slide-down {
+  animation: slide-down 0.7s ease-out forwards;
+  animation-delay: 1000ms;
+}
+
+@keyframes slide-down {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
   }
 }
+
 .custom-flower-cursor {
   cursor: "🌸";
 }
@@ -281,5 +610,50 @@ body {
   }
   100% {
     transform: rotate(0deg);
+  }
+}
+
+.MuiBox-root {
+  overflow-x: hidden !important;
+}
+
+/* ============================================
+   PREMIUM CHAT ANIMATIONS
+============================================ */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* ============================================
+   RESPONSIVE CHAT WINDOW
+============================================ */
+@media (max-width: 640px) {
+  .chat-window {
+    width: 100vw !important;
+    height: 100vh !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    border-radius: 0 !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .chat-window {
+    width: 380px !important;
+    height: 550px !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    border-radius: 20px !important;
   }
 }
