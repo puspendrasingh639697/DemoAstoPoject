@@ -4,8 +4,11 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "vite",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ],
   "env": {
-    "REACT_APP_SUPABASE_URL": "https://zfunalpwvrssdottjlwl.supabase.co",
-    "REACT_APP_SUPABASE_ANON_KEY": "sb_publishable_Bek1SGfFsfTSLvxuB70HiA_S9sHp28X"
+    "VITE_SUPABASE_URL": "https://zfunalpwvrssdottjlwl.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "sb_publishable_Bek1SGfFsfTSLvxuB70HiA_S9sHp28X"
   }
 }
